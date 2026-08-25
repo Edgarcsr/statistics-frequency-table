@@ -47,8 +47,8 @@ export function SimplexTable({
   }
 
   return (
-    <div className="flex justify-center" data-simplex-table={step}>
-      <Table className="w-auto [&>div]:w-auto">
+    <div data-simplex-table={step}>
+      <Table>
         <TableHeader>
           <TableRow className="border-b border-border/50">
             <TableHead className="font-bold text-center min-w-[80px] text-xs uppercase tracking-widest text-muted-foreground">

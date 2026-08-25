@@ -103,14 +103,14 @@ export function getCellSteps() {
   }))
 }
 
-export function startIntroTour(onDone: () => void) {
+export function startIntroTour(onDone: () => void, onStepChange?: (index: number) => void) {
   destroyTour()
 
   driverInstance = driver({
     steps: getIntroSteps(),
     animate: true,
-    overlayColor: 'rgba(23, 58, 64, 0.65)',
-    overlayOpacity: 0.7,
+    overlayColor: 'rgba(0, 0, 0, 0.8)',
+    overlayOpacity: 0.85,
     stagePadding: 10,
     stageRadius: 12,
     allowClose: true,
@@ -119,6 +119,9 @@ export function startIntroTour(onDone: () => void) {
     nextBtnText: 'Próximo',
     prevBtnText: 'Anterior',
     doneBtnText: 'Vamos preencher!',
+    onHighlightStarted: (_element, _step, opts) => {
+      onStepChange?.(opts.state.activeIndex ?? 0)
+    },
     onDestroyed: () => {
       onDone()
     },
@@ -135,14 +138,14 @@ export function startFillTour(onCorrect: (index: number) => void, onComplete: ()
   driverInstance = driver({
     steps,
     animate: true,
-    overlayColor: 'rgba(23, 58, 64, 0.65)',
-    overlayOpacity: 0.7,
+    overlayColor: 'rgba(0, 0, 0, 0.8)',
+    overlayOpacity: 0.85,
     stagePadding: 12,
     stageRadius: 12,
     allowClose: true,
     showProgress: true,
     progressText: 'Célula {{current}} de {{total}}',
-    nextBtnText: 'Confirmar',
+    nextBtnText: 'Avançar',
     prevBtnText: 'Voltar',
     doneBtnText: 'Resolver!',
     disableButtons: ['next'],

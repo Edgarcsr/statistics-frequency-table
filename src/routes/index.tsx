@@ -27,28 +27,36 @@ function Home() {
   const [steps, setSteps] = useState<SimplexStep[]>([])
   const [currentStep, setCurrentStep] = useState(0)
   const [highlight, setHighlight] = useState<{ row: number; col: number }[]>([])
+  const [introTourActive, setIntroTourActive] = useState(false)
+  const [introStep, setIntroStep] = useState(0)
 
   const handleStartTour = useCallback(() => {
-    startIntroTour(() => {
-      setPhase('filling')
-      setTimeout(() => {
-        startFillTour(
-          (index) => {
-            const cellStep = FILL_STEPS[index]
-            if (cellStep) {
-              const [r, c] = cellStep.cell.split('-').map(Number)
-              setValues((prev) => {
-                const next = prev.map((row) => [...row])
-                next[r][c] = cellStep.answer
-                return next
-              })
-              setFilledCells((prev) => new Set([...prev, cellStep.cell]))
-            }
-          },
-          () => setPhase('ready'),
-        )
-      }, 400)
-    })
+    setIntroTourActive(true)
+    setIntroStep(0)
+    startIntroTour(
+      () => {
+        setIntroTourActive(false)
+        setPhase('filling')
+        setTimeout(() => {
+          startFillTour(
+            (index) => {
+              const cellStep = FILL_STEPS[index]
+              if (cellStep) {
+                const [r, c] = cellStep.cell.split('-').map(Number)
+                setValues((prev) => {
+                  const next = prev.map((row) => [...row])
+                  next[r][c] = cellStep.answer
+                  return next
+                })
+                setFilledCells((prev) => new Set([...prev, cellStep.cell]))
+              }
+            },
+            () => setPhase('ready'),
+          )
+        }, 400)
+      },
+      (index) => setIntroStep(index),
+    )
   }, [])
 
   const handleManualFill = useCallback((row: number, col: number, raw: string) => {
@@ -96,6 +104,8 @@ function Home() {
     setSteps([])
     setCurrentStep(0)
     setHighlight([])
+    setIntroTourActive(false)
+    setIntroStep(0)
     destroyTour()
   }, [initialTableau])
 
@@ -107,51 +117,62 @@ function Home() {
       : tableau
 
   return (
-    <div className="min-h-screen flex flex-col items-center">
+    <div className="min-h-screen flex flex-col items-center justify-center">
       <div className="w-full max-w-4xl py-12 px-6 flex flex-col items-center gap-8">
         {/* Problema */}
-        <Card className="w-full max-w-2xl" data-simplex-problem>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">{problem.title}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {problem.context}
-            </p>
-            <div className="rounded-md bg-muted p-3 font-mono text-sm space-y-1">
-              <p className="font-semibold">Max {problem.objectiveFn}</p>
-              {problem.constraints.map((c, i) => (
-                <p key={i} className="text-muted-foreground">
-                  {c.label}: {c.coefficients.map((val, j) => `${val}${problem.varNames[j]}`).join(' + ')} ≤ {c.rhs}
+        {(introTourActive || phase === 'filling') && (
+          <div
+            className={`fixed inset-x-0 top-0 flex justify-center p-4 pointer-events-none ${
+              introTourActive && introStep === 0 ? 'z-[10005]' : 'z-40'
+            }`}
+          >
+            <Card
+              className={`w-full max-w-2xl gap-0 py-3 ${
+                introTourActive && introStep === 0 ? 'shadow-lg' : ''
+              }`}
+              data-simplex-problem
+            >
+              <CardHeader className="pb-1">
+                <CardTitle className="text-sm">{problem.title}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                  {problem.context}
                 </p>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                <div className="rounded-md bg-muted p-2 font-mono text-xs space-y-1">
+                  <p className="font-semibold">Max {problem.objectiveFn}</p>
+                  {problem.constraints.map((c, i) => (
+                    <p key={i} className="text-muted-foreground">
+                      {c.label}: {c.coefficients.map((val, j) => `${val}${problem.varNames[j]}`).join(' + ')} ≤ {c.rhs}
+                    </p>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Tabela */}
-        <Card className="w-full max-w-3xl">
-            <CardContent>
-              <SimplexTable
-                tableau={currentTableau}
-                values={values}
-                onChange={handleManualFill}
-                editable={phase === 'idle' || phase === 'filling'}
-                highlight={highlight}
-                pivotCell={phase === 'solving' ? steps[currentStep]?.tableau.pivot : undefined}
-                filledCells={filledCells}
-                step={currentStep}
-              />
-            </CardContent>
-          </Card>
+        <Card className="w-full max-w-3xl py-0 overflow-hidden mx-auto">
+          <SimplexTable
+            tableau={currentTableau}
+            values={values}
+            onChange={handleManualFill}
+            editable={phase === 'idle' || phase === 'filling'}
+            highlight={highlight}
+            pivotCell={phase === 'solving' ? steps[currentStep]?.tableau.pivot : undefined}
+            filledCells={filledCells}
+            step={currentStep}
+          />
+        </Card>
 
         {/* Controles */}
         <div className="flex flex-col items-center gap-3">
           {phase === 'idle' && (
             <div className="flex gap-3">
               <Button onClick={handleStartTour}>Iniciar Tutorial</Button>
-              <Button variant="outline" onClick={() => setPhase('ready')}>
-                Preencher Manual
+              <Button variant="outline" onClick={handleSolve}>
+                Resolver
               </Button>
             </div>
           )}
