@@ -40,16 +40,15 @@ export function SimplexTable({
   const isFilled = (row: number, col: number) =>
     filledCells.has(`${row}-${col}`)
 
-  const isEditableCell = (row: number, col: number) => {
+  const isEditableCell = (_row: number, col: number) => {
     if (!editable) return false
-    if (isZRow(row)) return false
     if (col === values[0].length - 1) return false
     return true
   }
 
   return (
     <div className="flex justify-center" data-simplex-table={step}>
-      <Table className="w-auto">
+      <Table className="w-auto [&>div]:w-auto">
         <TableHeader>
           <TableRow className="border-b border-border/50">
             <TableHead className="font-bold text-center min-w-[80px] text-xs uppercase tracking-widest text-muted-foreground">
@@ -107,11 +106,11 @@ export function SimplexTable({
                         value={val === 0 ? '' : String(Number.isInteger(val) ? val : val.toFixed(2))}
                         onChange={(e) => onChange?.(i, j, e.target.value)}
                         placeholder="?"
-                        className={`w-16 h-9 text-center text-sm font-mono bg-transparent outline-none transition-all duration-150 ${
+                        className={`w-16 h-9 text-center text-sm font-mono rounded-md outline-none transition-all duration-150 ${
                           filled
-                            ? 'text-foreground border-b border-primary/50 focus:border-primary'
-                            : 'text-muted-foreground border-b border-transparent focus:border-muted-foreground/50'
-                        } ${isHighlighted(i, j) ? 'border-b border-primary' : ''}`}
+                            ? 'bg-muted/40 text-foreground focus:ring-2 focus:ring-primary'
+                            : 'bg-muted/20 text-muted-foreground focus:ring-2 focus:ring-primary'
+                        } ${isHighlighted(i, j) ? 'bg-primary/5' : ''}`}
                       />
                     ) : (
                       <span className="text-sm">

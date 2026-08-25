@@ -109,16 +109,6 @@ function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center">
       <div className="w-full max-w-4xl py-12 px-6 flex flex-col items-center gap-8">
-        {/* Header */}
-        <header className="text-center">
-          <h1 className="text-4xl font-bold tracking-tight">
-            Simplex Resolver
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            Monte a tabela Simplex guiado passo a passo
-          </p>
-        </header>
-
         {/* Problema */}
         <Card className="w-full max-w-2xl" data-simplex-problem>
           <CardHeader className="pb-3">
@@ -140,24 +130,7 @@ function Home() {
         </Card>
 
         {/* Tabela */}
-        <div className="w-full flex justify-center">
-          <Card className="w-full max-w-3xl">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Tabela Simplex</CardTitle>
-                {(phase === 'filling' || phase === 'solving') && (
-                  <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-md">
-                    {phase === 'filling' ? 'Preenchendo' : `Passo ${currentStep + 1}/${steps.length}`}
-                  </span>
-                )}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {phase === 'idle' && 'Inicie o tutorial para preencher'}
-                {phase === 'filling' && 'Siga o tour e preencha os valores'}
-                {phase === 'ready' && 'Tabela completa — pronta para resolver'}
-                {phase === 'solving' && 'Acompanhe cada iteração'}
-              </p>
-            </CardHeader>
+        <Card className="w-full max-w-3xl">
             <CardContent>
               <SimplexTable
                 tableau={currentTableau}
@@ -171,7 +144,6 @@ function Home() {
               />
             </CardContent>
           </Card>
-        </div>
 
         {/* Controles */}
         <div className="flex flex-col items-center gap-3">
