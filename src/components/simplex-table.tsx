@@ -51,14 +51,14 @@ export function SimplexTable({
     <div className="flex justify-center" data-simplex-table={step}>
       <Table className="w-auto">
         <TableHeader>
-          <TableRow className="border-b-2 border-foreground/20">
-            <TableHead className="font-bold text-center min-w-[80px] text-sm uppercase tracking-wider">
+          <TableRow className="border-b border-border/50">
+            <TableHead className="font-bold text-center min-w-[80px] text-xs uppercase tracking-widest text-muted-foreground">
               Base
             </TableHead>
             {tableau.headers.map((h, j) => (
               <TableHead
                 key={j}
-                className="font-bold text-center min-w-[90px] text-sm uppercase tracking-wider"
+                className="font-bold text-center min-w-[100px] text-xs uppercase tracking-widest text-muted-foreground"
                 data-col={h}
               >
                 {h}
@@ -72,12 +72,12 @@ export function SimplexTable({
               key={i}
               className={
                 isZRow(i)
-                  ? 'border-t-2 border-foreground/20 bg-[var(--sand)]'
-                  : ''
+                  ? 'border-t border-border/50 bg-muted/30'
+                  : 'border-border/30'
               }
             >
               <TableCell
-                className={`font-bold text-center text-base ${
+                className={`font-bold text-center text-sm ${
                   isZRow(i) ? 'text-foreground' : 'text-muted-foreground'
                 }`}
               >
@@ -89,14 +89,12 @@ export function SimplexTable({
                 return (
                   <TableCell
                     key={j}
-                    className={`text-center tabular-nums transition-all ${
+                    className={`text-center tabular-nums transition-all duration-150 ${
                       isPivot(i, j)
-                        ? 'bg-[var(--lagoon)] text-white font-bold shadow-md scale-105'
+                        ? 'bg-primary text-primary-foreground font-bold'
                         : isHighlighted(i, j)
-                          ? 'bg-[var(--lagoon)]/10 font-medium'
-                          : isZRow(i)
-                            ? 'font-semibold text-base'
-                            : ''
+                          ? 'bg-muted/50'
+                          : ''
                     }`}
                     data-row={tableau.basis[i]}
                     data-col={tableau.headers[j]}
@@ -109,14 +107,14 @@ export function SimplexTable({
                         value={val === 0 ? '' : String(Number.isInteger(val) ? val : val.toFixed(2))}
                         onChange={(e) => onChange?.(i, j, e.target.value)}
                         placeholder="?"
-                        className={`w-16 h-10 text-center text-base font-mono rounded-lg border-2 transition-all outline-none ${
+                        className={`w-16 h-9 text-center text-sm font-mono bg-transparent outline-none transition-all duration-150 ${
                           filled
-                            ? 'border-[var(--lagoon)] bg-[var(--lagoon)]/5 focus:border-[var(--lagoon-deep)]'
-                            : 'border-[var(--line)] bg-white/50 focus:border-[var(--lagoon)] focus:bg-white'
-                        } ${isHighlighted(i, j) ? 'border-[var(--lagoon)] shadow-md' : ''}`}
+                            ? 'text-foreground border-b border-primary/50 focus:border-primary'
+                            : 'text-muted-foreground border-b border-transparent focus:border-muted-foreground/50'
+                        } ${isHighlighted(i, j) ? 'border-b border-primary' : ''}`}
                       />
                     ) : (
-                      <span className="text-base">
+                      <span className="text-sm">
                         {Number.isInteger(val) ? val : val.toFixed(2)}
                       </span>
                     )}
