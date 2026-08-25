@@ -1,25 +1,19 @@
-# Shadcn Tour - Tutorial Interativo
+# Simplex Resolver
 
-Site que ensina usar componentes shadcn/ui com guias interativos via driver.js.
+Tutorial interativo que ensina o método Simplex de programação linear.
+
+## Como funciona
+
+1. Tela inicial mostra um problema de otimização + tabela Simplex centralizada
+2. Driver.js guia o usuário passo a passo
+3. Cada passo: extrair dados → preencher tabela → iterar → solução
 
 ## Stack
 
-- [TanStack Start](https://tanstack.com/start) - SSR framework
-- [shadcn/ui](https://ui.shadcn.com/) - componentes React
-- [driver.js](https://driver.js.org/) - spotlight tours
+- [TanStack Start](https://tanstack.com/start) - SSR + file-based routing
+- [shadcn/ui](https://ui.shadcn.com/) - componentes (Table, Button, Card, Dialog)
+- [driver.js](https://driver.js.org/) - spotlight tours interativos
 - [Tailwind CSS](https://tailwindcss.com/) - estilos
-
-## Componentes cobertos
-
-- Button
-- Card
-- Dialog
-- Form (Input, Label, Select, Checkbox)
-- Table
-- Tabs
-- Toast/Sonner
-- Dropdown Menu
-- Sheet
 
 ## Run
 
@@ -33,34 +27,21 @@ bun --bun run dev
 ```
 src/
 ├── routes/
-│   ├── __root.tsx          # layout + nav
-│   ├── index.tsx           # home
-│   └── components/
-│       ├── button.tsx      # demo + tour Button
-│       ├── card.tsx        # demo + tour Card
-│       ├── dialog.tsx      # demo + tour Dialog
-│       ├── form.tsx        # demo + tour Form
-│       └── ...
+│   ├── __root.tsx        # layout
+│   └── index.tsx         # tela inicial (tabela + problema)
 ├── components/
-│   ├── ui/                 # shadcn components
-│   └── tour/
-│       └── driver.ts       # config driver.js
-└── styles.css
+│   ├── ui/               # shadcn components
+│   └── simplex/
+│       ├── table.tsx     # tabela Simplex
+│       └── tour.tsx      # config driver.js
+└── lib/
+    └── simplex.ts        # logica do metodo
 ```
 
-## Tour flow
+## Fluxo do tutorial
 
-1. User clica "Start Tour" no componente
-2. Driver.js spotlight no elemento
-3. Tooltip explica props/uso
-4. Próximo componente
-
-## Dev
-
-```bash
-# add shadcn component
-pnpm dlx shadcn@latest add button
-
-# build
-bun --bun run build
-```
+1. Problema exibido acima da tabela
+2. Driver.js spotlight na celula correspondente
+3. Tooltip explica o que preencher
+4. Usuário confere → próximo passo
+5. Iteração completa → solução encontrada
