@@ -1,6 +1,14 @@
 export interface SimplexProblem {
+  title: string
+  context: string
   objective: number[]
-  constraints: { coefficients: number[]; rhs: number }[]
+  objectiveFn: string
+  varNames: string[]
+  constraints: {
+    coefficients: number[]
+    label: string
+    rhs: number
+  }[]
   maximize: boolean
 }
 
@@ -48,7 +56,7 @@ export function buildInitialTableau(problem: SimplexProblem): SimplexTableau {
   basis.push('Z')
 
   const headers = [
-    ...Array.from({ length: nVars }, (_, i) => `x${i + 1}`),
+    ...problem.varNames,
     ...Array.from({ length: nConstraints }, (_, i) => `s${i + 1}`),
     'Sol',
   ]
@@ -76,7 +84,7 @@ export function findPivot(tableau: SimplexTableau): { row: number; col: number }
   for (let i = 0; i < tableau.matrix.length - 1; i++) {
     const val = tableau.matrix[i][entering]
     if (val > EPSILON) {
-      const ratio = tableau.matrix[i][tableau.matrix.length > 0 ? tableau.matrix[i].length - 1 : 0] / val
+      const ratio = tableau.matrix[i][tableau.matrix[i].length - 1] / val
       if (ratio < minRatio) {
         minRatio = ratio
         leaving = i
@@ -129,7 +137,8 @@ export function solveStepByStep(problem: SimplexProblem): SimplexStep[] {
 
   steps.push({
     tableau,
-    description: 'Tabela inicial: identificamos as variáveis de folga e os coeficientes.',
+    description:
+      'Tabela inicial montada. As variáveis de folga (s₁, s₂) representam os recursos não utilizados de cada restrição.',
   })
 
   let iteration = 0
@@ -138,13 +147,13 @@ export function solveStepByStep(problem: SimplexProblem): SimplexStep[] {
     if (!pivotPos) break
 
     const entering = tableau.headers[pivotPos.col]
-    const leaving = tableau.basis[pivotPos.row]
+    const leavingVar = tableau.basis[pivotPos.row]
 
     tableau = { ...tableau, pivot: pivotPos, entering: pivotPos.col, leaving: pivotPos.row }
 
     steps.push({
       tableau,
-      description: `Iteração ${iteration + 1}: variável ${entering} entra, ${leaving} sai. Pivô em (${pivotPos.row + 1}, ${pivotPos.col + 1}).`,
+      description: `Iteração ${iteration + 1}: ${entering} entra na base (maior custo-benefício). ${leavingVar} sai (menor razão).`,
       highlight: [{ row: pivotPos.row, col: pivotPos.col }],
     })
 
@@ -152,7 +161,7 @@ export function solveStepByStep(problem: SimplexProblem): SimplexStep[] {
 
     steps.push({
       tableau,
-      description: `Após pivotear: nova tabela com ${tableau.basis[pivotPos.row]} na base.`,
+      description: `Após pivotear: ${tableau.basis[pivotPos.row]} agora está na base. Recurso alocado de forma mais eficiente.`,
     })
 
     iteration++
@@ -160,9 +169,16 @@ export function solveStepByStep(problem: SimplexProblem): SimplexStep[] {
 
   if (isOptimal(tableau)) {
     const zVal = tableau.matrix[tableau.matrix.length - 1][tableau.matrix[0].length - 1]
+    const solutions = problem.varNames.map((name) => {
+      const row = tableau.basis.indexOf(name)
+      return row !== -1 ? tableau.matrix[row][tableau.matrix[row].length - 1] : 0
+    })
+    const solStr = problem.varNames
+      .map((name, i) => `${name} = ${solutions[i]}`)
+      .join(', ')
     steps.push({
       tableau,
-      description: `Solução ótima encontrada! Z = ${zVal}`,
+      description: `Solução ótima! Produza ${solStr}. Lucro máximo: R$ ${zVal}`,
     })
   }
 
@@ -171,21 +187,16 @@ export function solveStepByStep(problem: SimplexProblem): SimplexStep[] {
 
 export function getDefaultProblem(): SimplexProblem {
   return {
-    objective: [3, 5],
+    title: 'Produção de Móveis',
+    context:
+      'Uma fábrica produz duas cadeiras (A) e mesas (B). Cada cadeira gasta 2h de marcenaria e 1h de acabamento. Cada mesa gasta 1h de marcenaria e 3h de acabamento. A fábrica tem 120h de marcenaria e 90h de acabamento disponíveis por semana. Lucro: R$ 40 por cadeira, R$ 60 por mesa.',
+    objective: [40, 60],
+    objectiveFn: 'Z = 40A + 60B',
+    varNames: ['A', 'B'],
     constraints: [
-      { coefficients: [1, 0], rhs: 4 },
-      { coefficients: [0, 1], rhs: 6 },
-      { coefficients: [1, 2], rhs: 8 },
+      { coefficients: [2, 1], label: 'Marcenaria', rhs: 120 },
+      { coefficients: [1, 3], label: 'Acabamento', rhs: 90 },
     ],
     maximize: true,
   }
-}
-
-export function formatProblem(problem: SimplexProblem): string {
-  const vars = problem.objective.map((c, i) => `${c}x${i + 1}`).join(' + ')
-  const lines = problem.constraints.map((c) => {
-    const lhs = c.coefficients.map((val, j) => `${val}x${j + 1}`).join(' + ')
-    return `  ${lhs} ≤ ${c.rhs}`
-  })
-  return `Maximizar Z = ${vars}\nSujeito a:\n${lines.join('\n')}\n  x₁, x₂ ≥ 0`
 }
