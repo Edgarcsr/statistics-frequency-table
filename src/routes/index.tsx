@@ -267,7 +267,7 @@ function Home() {
       : tableau
 
   return (
-    <div className="min-h-[calc(100dvh-3.5rem)] flex flex-col items-center">
+    <div className="flex flex-1 flex-col items-center">
       {showFillWarning && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-2">
           <Card className="flex-row items-center gap-3 py-2.5 pl-4 pr-2.5 shadow-lg border-destructive/40">
@@ -487,7 +487,7 @@ function Home() {
         {/* Descrição do passo */}
         {phase === 'solving' && steps[currentStep] && (
           <Card className="w-full max-w-2xl" key={currentStep}>
-            <CardContent className="pt-6">
+            <CardContent>
               <StepExplanation
                 description={steps[currentStep].description}
                 explain={steps[currentStep].explain}
