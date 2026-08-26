@@ -15,56 +15,56 @@ export const FILL_STEPS: CellStep[] = [
     cell: '0-0',
     title: 'Restrição 1 → Coluna A',
     description:
-      'Cada cadeira gasta 2h de marcenaria. Qual o coeficiente de A na primeira restrição?',
+      'A cadeira A gasta 2 horas de marcenaria por unidade, então colocamos 2 aqui.',
     answer: 2,
   },
   {
     cell: '0-1',
     title: 'Restrição 1 → Coluna B',
     description:
-      'Cada mesa gasta 1h de marcenaria. Qual o coeficiente de B na primeira restrição?',
+      'A mesa B gasta 1 hora de marcenaria por unidade, então colocamos 1 aqui.',
     answer: 1,
   },
   {
-    cell: '0-3',
+    cell: '0-4',
     title: 'Restrição 1 → Solução',
     description:
-      'Total de horas disponíveis de marcenaria: 120h. Preencha o lado direito.',
+      'A fábrica tem 120 horas de marcenaria disponíveis por semana, então o total é 120.',
     answer: 120,
   },
   {
     cell: '1-0',
     title: 'Restrição 2 → Coluna A',
     description:
-      'Cada cadeira gasta 1h de acabamento. Qual o coeficiente de A na segunda restrição?',
+      'A cadeira A gasta 1 hora de acabamento por unidade, então colocamos 1 aqui.',
     answer: 1,
   },
   {
     cell: '1-1',
     title: 'Restrição 2 → Coluna B',
     description:
-      'Cada mesa gasta 3h de acabamento. Qual o coeficiente de B na segunda restrição?',
+      'A mesa B gasta 3 horas de acabamento por unidade, então colocamos 3 aqui.',
     answer: 3,
   },
   {
     cell: '1-3',
     title: 'Restrição 2 → Solução',
     description:
-      'Total de horas disponíveis de acabamento: 90h. Preencha o lado direito.',
+      'A fábrica tem 90 horas de acabamento disponíveis por semana, então o total é 90.',
     answer: 90,
   },
   {
     cell: '2-0',
     title: 'Função Objetivo → Coluna A',
     description:
-      'Lucro por cadeira: R$ 40. Na tabela Simplex, colocamos o negativo. Qual valor?',
+      'O lucro da cadeira A é R$ 40, mas na tabela Simplex entramos com o negativo: -40.',
     answer: -40,
   },
   {
     cell: '2-1',
     title: 'Função Objetivo → Coluna B',
     description:
-      'Lucro por mesa: R$ 60. Negativo na tabela. Qual valor?',
+      'O lucro da mesa B é R$ 60, mas na tabela Simplex entramos com o negativo: -60.',
     answer: -60,
   },
 ]

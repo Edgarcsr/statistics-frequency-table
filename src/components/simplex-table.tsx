@@ -40,11 +40,7 @@ export function SimplexTable({
   const isFilled = (row: number, col: number) =>
     filledCells.has(`${row}-${col}`)
 
-  const isEditableCell = (_row: number, col: number) => {
-    if (!editable) return false
-    if (col === values[0].length - 1) return false
-    return true
-  }
+  const isEditableCell = () => editable
 
   return (
     <div data-simplex-table={step}>
@@ -83,7 +79,7 @@ export function SimplexTable({
                 {tableau.basis[i]}
               </TableCell>
               {row.map((val, j) => {
-                const editable_ = isEditableCell(i, j)
+                const editable_ = isEditableCell()
                 const filled = isFilled(i, j)
                 return (
                   <TableCell
@@ -99,24 +95,19 @@ export function SimplexTable({
                     data-col={tableau.headers[j]}
                     data-cell={`${i}-${j}`}
                   >
-                    {editable_ ? (
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        value={val === 0 ? '' : String(Number.isInteger(val) ? val : val.toFixed(2))}
-                        onChange={(e) => onChange?.(i, j, e.target.value)}
-                        placeholder="?"
-                        className={`w-16 h-9 text-center text-sm font-mono rounded-md outline-none transition-all duration-150 ${
-                          filled
-                            ? 'bg-muted/40 text-foreground focus:ring-2 focus:ring-primary'
-                            : 'bg-muted/20 text-muted-foreground focus:ring-2 focus:ring-primary'
-                        } ${isHighlighted(i, j) ? 'bg-primary/5' : ''}`}
-                      />
-                    ) : (
-                      <span className="text-sm">
-                        {Number.isInteger(val) ? val : val.toFixed(2)}
-                      </span>
-                    )}
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      value={val === 0 ? '' : String(Number.isInteger(val) ? val : val.toFixed(2))}
+                      onChange={(e) => onChange?.(i, j, e.target.value)}
+                      disabled={!editable_}
+                      placeholder="?"
+                      className={`w-16 h-9 text-center text-sm font-mono rounded-md outline-none transition-all duration-150 disabled:cursor-default disabled:opacity-100 ${
+                        filled
+                          ? 'bg-muted/40 text-foreground focus:ring-2 focus:ring-primary'
+                          : 'bg-muted/20 text-muted-foreground focus:ring-2 focus:ring-primary'
+                      } ${isHighlighted(i, j) ? 'bg-primary/5' : ''}`}
+                    />
                   </TableCell>
                 )
               })}
