@@ -14,7 +14,16 @@ import { startIntroTour, startFillTour, destroyTour } from '#/components/tour.ts
 import { Button } from '#/components/ui/button.tsx'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card.tsx'
 import { Tooltip, TooltipTrigger, TooltipContent } from '#/components/ui/tooltip.tsx'
-import { GraduationCap, Play, Eraser, SquarePlus, X } from 'lucide-react'
+import {
+  GraduationCap,
+  Play,
+  Eraser,
+  SquarePlus,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  TriangleAlert,
+} from 'lucide-react'
 import { cn } from '#/lib/utils.ts'
 
 export const Route = createFileRoute('/')({ component: Home })
@@ -33,9 +42,11 @@ function normalizeProblem(p: SimplexProblem): SimplexProblem {
 function ObjectiveToggle({
   maximize,
   onChange,
+  disabled,
 }: {
   maximize: boolean
   onChange: (maximize: boolean) => void
+  disabled?: boolean
 }) {
   return (
     <div className="flex items-center rounded-md bg-muted p-0.5" role="group" aria-label="Objetivo da função">
@@ -43,8 +54,9 @@ function ObjectiveToggle({
         type="button"
         onClick={() => onChange(true)}
         aria-pressed={maximize}
+        disabled={disabled}
         className={cn(
-          'h-7 rounded-[min(var(--radius-md),8px)] px-3 text-xs font-medium transition-colors',
+          'h-7 rounded-[min(var(--radius-md),8px)] px-3 text-xs font-medium transition-colors disabled:pointer-events-none disabled:opacity-50',
           maximize
             ? 'bg-background text-foreground shadow-xs'
             : 'text-muted-foreground hover:text-foreground',
@@ -56,8 +68,9 @@ function ObjectiveToggle({
         type="button"
         onClick={() => onChange(false)}
         aria-pressed={!maximize}
+        disabled={disabled}
         className={cn(
-          'h-7 rounded-[min(var(--radius-md),8px)] px-3 text-xs font-medium transition-colors',
+          'h-7 rounded-[min(var(--radius-md),8px)] px-3 text-xs font-medium transition-colors disabled:pointer-events-none disabled:opacity-50',
           !maximize
             ? 'bg-background text-foreground shadow-xs'
             : 'text-muted-foreground hover:text-foreground',
@@ -82,11 +95,19 @@ function Home() {
   const [currentStep, setCurrentStep] = useState(0)
   const [highlight, setHighlight] = useState<{ row: number; col: number }[]>([])
   const [introTourActive, setIntroTourActive] = useState(false)
+  const [fillTourActive, setFillTourActive] = useState(false)
+  const [showFillWarning, setShowFillWarning] = useState(false)
 
   useEffect(() => {
     setValues(blankTourCells(tableau.matrix))
     setFilledCells(new Set())
   }, [tableau])
+
+  useEffect(() => {
+    if (!showFillWarning) return
+    const timer = setTimeout(() => setShowFillWarning(false), 4000)
+    return () => clearTimeout(timer)
+  }, [showFillWarning])
 
   const handleToggleMaximize = useCallback((maximize: boolean) => {
     setProblem((prev) => normalizeProblem({ ...prev, maximize }))
@@ -159,6 +180,7 @@ function Home() {
         setIntroTourActive(false)
         setPhase('filling')
         setTimeout(() => {
+          setFillTourActive(true)
           startFillTour(
             problem,
             (step) => {
@@ -170,7 +192,10 @@ function Home() {
               })
               setFilledCells((prev) => new Set([...prev, step.cell]))
             },
-            () => setPhase('ready'),
+            () => {
+              setFillTourActive(false)
+              setPhase('ready')
+            },
           )
         }, 400)
       },
@@ -190,14 +215,18 @@ function Home() {
   }, [])
 
   const handleSolve = useCallback(() => {
-    const result = solveStepByStep(problem)
+    if (filledCells.size === 0) {
+      setShowFillWarning(true)
+      return
+    }
+    const result = solveStepByStep(problem, tableau)
     setSteps(result)
     setCurrentStep(0)
     setPhase('solving')
     if (result.length > 0) {
       setHighlight(result[0].highlight ?? [])
     }
-  }, [problem])
+  }, [problem, tableau, filledCells])
 
   const handleNextStep = useCallback(() => {
     if (currentStep < steps.length - 1) {
@@ -215,23 +244,22 @@ function Home() {
     }
   }, [currentStep, steps])
 
-  const handleReset = useCallback(() => {
+  const handleClear = useCallback(() => {
+    setValues(blankTourCells(tableau.matrix))
+    setFilledCells(new Set())
     setPhase('idle')
     setSteps([])
     setCurrentStep(0)
     setHighlight([])
-    setIntroTourActive(false)
     destroyTour()
-  }, [])
-
-  const handleClear = useCallback(() => {
-    setValues(blankTourCells(tableau.matrix))
-    setFilledCells(new Set())
   }, [tableau])
 
   const isOptimal = steps.length > 0 && currentStep === steps.length - 1
 
-  const canEditStructure = phase === 'idle' || phase === 'filling'
+  const canEditStructure =
+    (phase === 'idle' || phase === 'filling') && !introTourActive && !fillTourActive
+
+  const canClear = !introTourActive && !fillTourActive && (phase !== 'idle' || filledCells.size > 0)
 
   const currentTableau =
     phase === 'solving' && steps[currentStep]
@@ -239,33 +267,43 @@ function Home() {
       : tableau
 
   return (
-    <div
-      className={cn(
-        'min-h-[calc(100dvh-3.5rem)] flex flex-col items-center',
-        phase !== 'solving' && 'justify-center',
-      )}
-    >
-      <div
-        className={cn(
-          'w-full max-w-4xl py-12 px-6 flex flex-col items-center gap-8',
-          phase !== 'solving' && '-translate-y-12',
-        )}
-      >
-        {/* Problema */}
-        {(introTourActive || phase === 'filling') && (
-          <Card className="w-full max-w-2xl gap-0 py-3" data-simplex-problem>
-            <CardHeader className="pb-1">
-              <CardTitle className="text-sm">{problem.title}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {problem.context && (
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  {problem.context}
-                </p>
-              )}
-            </CardContent>
+    <div className="min-h-[calc(100dvh-3.5rem)] flex flex-col items-center">
+      {showFillWarning && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-2">
+          <Card className="flex-row items-center gap-3 py-2.5 pl-4 pr-2.5 shadow-lg border-destructive/40">
+            <TriangleAlert className="size-4 text-destructive shrink-0" />
+            <p className="text-sm">Preencha a tabela antes de resolver.</p>
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              aria-label="Fechar aviso"
+              onClick={() => setShowFillWarning(false)}
+            >
+              <X />
+            </Button>
           </Card>
-        )}
+        </div>
+      )}
+      <div className="w-full max-w-4xl py-12 px-6 flex flex-col items-center gap-8">
+        {/* Problema — sempre montado, com espaço reservado, para a tabela abaixo nunca mudar de posição entre as fases */}
+        <Card
+          className={cn(
+            'w-full max-w-2xl gap-0 py-3',
+            !(introTourActive || phase === 'filling') && 'invisible',
+          )}
+          data-simplex-problem
+        >
+          <CardHeader className="pb-1">
+            <CardTitle className="text-sm">{problem.title}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {problem.context && (
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {problem.context}
+              </p>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Tabela */}
         <div className="w-full max-w-4xl mx-auto flex flex-col gap-2">
@@ -370,67 +408,80 @@ function Home() {
           </div>
         </div>
 
-        {/* Controles */}
-        <div className="w-full flex flex-col items-center gap-3">
-          {phase === 'idle' && (
-            <div className="flex w-full max-w-4xl justify-between items-center">
-              <div className="flex items-center gap-1">
-                <Button variant="ghost" size="sm" onClick={handleStartTour}>
-                  Iniciar Tutorial
-                  <GraduationCap />
-                </Button>
-                <Button variant="ghost" size="sm" onClick={handleClear}>
-                  Limpar
-                  <Eraser />
-                </Button>
-              </div>
-              <div className="flex items-center gap-2">
-                <ObjectiveToggle maximize={problem.maximize} onChange={handleToggleMaximize} />
-                <Button size="sm" onClick={handleSolve}>
-                  Resolver
-                  <Play />
-                </Button>
-              </div>
-            </div>
-          )}
+        {/* Controles — mesma barra, mesmos botões, na mesma posição em todas as fases;
+            o que muda é apenas o estado disabled. O grupo Anterior/Próximo ocupa o
+            lugar do botão Resolver durante a resolução, em vez de disputar espaço à parte. */}
+        <div className="w-full max-w-4xl flex justify-between items-center">
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={phase !== 'idle' && phase !== 'filling'}
+              onClick={handleStartTour}
+            >
+              Iniciar Tutorial
+              <GraduationCap />
+            </Button>
+            <Button
+              variant={phase === 'filling' ? 'outline' : 'ghost'}
+              size="sm"
+              disabled={!canClear}
+              onClick={handleClear}
+            >
+              Limpar
+              <Eraser />
+            </Button>
+          </div>
 
-          {phase === 'filling' && (
-            <div className="flex w-full max-w-4xl justify-between">
-              <Button variant="ghost" size="sm" onClick={handleStartTour}>
-                Iniciar Tutorial
-                <GraduationCap />
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleClear}>
-                Limpar
-                <Eraser />
-              </Button>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center" data-simplex-objective>
+              <ObjectiveToggle
+                maximize={problem.maximize}
+                onChange={handleToggleMaximize}
+                disabled={phase === 'solving'}
+              />
             </div>
-          )}
-
-          {phase === 'ready' && (
-            <div className="flex gap-3">
-              <Button size="sm" onClick={handleSolve}>Resolver</Button>
-              <Button variant="ghost" size="sm" onClick={handleReset}>
-                Reiniciar
-              </Button>
-            </div>
-          )}
-
-          {phase === 'solving' && (
-            <div className="flex flex-col items-center gap-3">
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={handlePrevStep} disabled={currentStep === 0}>
-                  Anterior
-                </Button>
-                <Button onClick={handleNextStep} disabled={isOptimal}>
-                  {isOptimal ? 'Concluído' : 'Próximo'}
-                </Button>
+            {phase === 'solving' ? (
+              <div className="flex items-center rounded-md border border-border" role="group" data-slot="button-group">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      className="rounded-r-none"
+                      aria-label="Passo anterior"
+                      onClick={handlePrevStep}
+                      disabled={currentStep === 0}
+                    >
+                      <ChevronLeft />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Passo anterior</TooltipContent>
+                </Tooltip>
+                <div className="h-5 w-px bg-border" />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      className="rounded-l-none"
+                      aria-label="Próximo passo"
+                      onClick={handleNextStep}
+                      disabled={isOptimal}
+                    >
+                      <ChevronRight />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{isOptimal ? 'Concluído' : 'Próximo passo'}</TooltipContent>
+                </Tooltip>
               </div>
-              <Button variant="ghost" size="sm" onClick={handleReset}>
-                Reiniciar
+            ) : (
+              <Button size="sm" onClick={handleSolve} data-simplex-solve>
+                Resolver
+                <Play />
               </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Descrição do passo */}

@@ -180,9 +180,12 @@ export function isOptimal(tableau: SimplexTableau): boolean {
   return true
 }
 
-export function solveStepByStep(problem: SimplexProblem): SimplexStep[] {
+export function solveStepByStep(
+  problem: SimplexProblem,
+  initialTableau?: SimplexTableau,
+): SimplexStep[] {
   const steps: SimplexStep[] = []
-  let tableau = buildInitialTableau(problem)
+  let tableau = initialTableau ?? buildInitialTableau(problem)
 
   steps.push({
     tableau,

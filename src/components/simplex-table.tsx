@@ -89,6 +89,7 @@ export function SimplexTable({
           {values.map((row, i) => (
             <TableRow
               key={i}
+              data-simplex-zrow={isZRow(i) ? true : undefined}
               className={`transition-colors duration-150 ${
                 isZRow(i)
                   ? 'border-t border-border/50 bg-muted/30'
@@ -114,7 +115,7 @@ export function SimplexTable({
                     key={j}
                     className={`text-center tabular-nums transition-all duration-150 ${
                       isPivot(i, j)
-                        ? 'bg-primary text-primary-foreground font-bold'
+                        ? 'bg-primary font-bold'
                         : isHighlighted(i, j)
                           ? 'bg-muted/50'
                           : enteringCol === j
@@ -133,10 +134,12 @@ export function SimplexTable({
                       disabled={!editable_}
                       placeholder="?"
                       className={`w-16 h-9 text-center text-sm font-mono rounded-md outline-none transition-all duration-150 disabled:cursor-default disabled:opacity-100 ${
-                        filled
-                          ? 'bg-muted/40 text-foreground focus:ring-2 focus:ring-primary'
-                          : 'bg-muted/20 text-muted-foreground focus:ring-2 focus:ring-primary'
-                      } ${isHighlighted(i, j) ? 'bg-primary/5' : ''}`}
+                        isPivot(i, j) || isHighlighted(i, j)
+                          ? 'bg-transparent !text-black font-semibold focus:ring-2 focus:ring-primary'
+                          : filled
+                            ? 'bg-muted/40 text-foreground focus:ring-2 focus:ring-primary'
+                            : 'bg-muted/20 text-muted-foreground focus:ring-2 focus:ring-primary'
+                      }`}
                     />
                   </TableCell>
                 )

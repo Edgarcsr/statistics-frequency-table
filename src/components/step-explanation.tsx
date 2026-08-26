@@ -17,7 +17,8 @@ export function StepExplanation({ description, explain }: StepExplanationProps) 
               1. Coluna entrante (linha Z)
             </p>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Entre os coeficientes negativos da linha Z, escolhe-se o mais negativo:
+              Entre os coeficientes negativos da linha Z (cada um representa quanto Z ainda pode
+              melhorar por essa variável), escolhe-se o mais negativo — maior ganho por unidade:
             </p>
             <div className="mt-1.5 flex flex-wrap gap-1.5">
               {explain.zCandidates?.map((c) => (

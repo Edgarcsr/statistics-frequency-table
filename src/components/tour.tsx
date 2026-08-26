@@ -137,6 +137,46 @@ function getCellSteps(fillSteps: CellStep[]) {
   }))
 }
 
+function getZRowStep() {
+  return {
+    element: '[data-simplex-zrow]',
+    popover: {
+      title: 'Por que a linha Z começa negativa?',
+      description:
+        'A linha Z guarda o lucro (ou custo) de cada variável com o sinal invertido. Enquanto ' +
+        'houver um coeficiente negativo ali, aumentar aquela variável ainda melhora o resultado ' +
+        '— ou seja, ainda existe uma direção de melhora. Quando não sobrar nenhum coeficiente ' +
+        'negativo, nenhuma variável melhora mais o resultado: a solução é ótima.',
+      side: 'top' as const,
+    },
+  }
+}
+
+function getConfirmSteps(problem: SimplexProblem) {
+  return [
+    {
+      element: '[data-simplex-objective]',
+      popover: {
+        title: 'Confirme o objetivo',
+        description: problem.maximize
+          ? 'Este é um problema de maximização — confirme que "Max" está selecionado antes de resolver.'
+          : 'Este é um problema de minimização — confirme que "Min" está selecionado antes de resolver.',
+        side: 'top' as const,
+        disableButtons: [] as ('next' | 'previous' | 'close')[],
+      },
+    },
+    {
+      element: '[data-simplex-solve]',
+      popover: {
+        title: 'Tudo preenchido!',
+        description: 'Agora clique em "Resolver" para acompanhar o simplex passo a passo.',
+        side: 'top' as const,
+        disableButtons: [] as ('next' | 'previous' | 'close')[],
+      },
+    },
+  ]
+}
+
 export function startIntroTour(onDone: () => void, onStepChange?: (index: number) => void) {
   destroyTour()
 
@@ -174,7 +214,7 @@ export function startFillTour(
   const fillSteps = generateFillSteps(problem)
 
   driverInstance = driver({
-    steps: getCellSteps(fillSteps),
+    steps: [...getCellSteps(fillSteps), getZRowStep(), ...getConfirmSteps(problem)],
     animate: true,
     overlayColor: 'rgba(0, 0, 0, 0.8)',
     overlayOpacity: 0.85,
