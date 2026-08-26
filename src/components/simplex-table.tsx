@@ -55,13 +55,13 @@ export function SimplexTable({
       <Table>
         <TableHeader>
           <TableRow className="border-b border-border/50">
-            <TableHead className="font-bold text-center min-w-[80px] text-xs uppercase tracking-widest text-muted-foreground">
+            <TableHead className="font-bold text-center min-w-20 text-xs uppercase tracking-widest text-muted-foreground">
               Base
             </TableHead>
             {tableau.headers.map((h, j) => (
               <TableHead
                 key={j}
-                className={`font-bold text-center min-w-[100px] text-xs uppercase tracking-widest transition-colors duration-150 ${
+                className={`font-bold text-center min-w-25 text-xs uppercase tracking-widest transition-colors duration-150 ${
                   enteringCol === j
                     ? 'text-primary bg-primary/10'
                     : 'text-muted-foreground'
@@ -79,7 +79,7 @@ export function SimplexTable({
               </TableHead>
             ))}
             {ratios && (
-              <TableHead className="font-bold text-center min-w-[100px] text-xs uppercase tracking-widest text-muted-foreground">
+              <TableHead className="font-bold text-center min-w-25 text-xs uppercase tracking-widest text-muted-foreground">
                 Razão
               </TableHead>
             )}
@@ -135,7 +135,7 @@ export function SimplexTable({
                       placeholder="?"
                       className={`w-16 h-9 text-center text-sm font-mono rounded-md outline-none transition-all duration-150 disabled:cursor-default disabled:opacity-100 ${
                         isPivot(i, j) || isHighlighted(i, j)
-                          ? 'bg-transparent !text-black font-semibold focus:ring-2 focus:ring-primary'
+                          ? 'bg-transparent text-black! font-semibold focus:ring-2 focus:ring-primary'
                           : filled
                             ? 'bg-muted/40 text-foreground focus:ring-2 focus:ring-primary'
                             : 'bg-muted/20 text-muted-foreground focus:ring-2 focus:ring-primary'
