@@ -1,20 +1,20 @@
-<p align="left">
+<p align="center">
   <img alt="Simplex Resolver" src="https://shieldcn.dev/header/glow.svg?title=Simplex+Resolver&subtitle=A+simple+and+interactive+way+to+understand+how+the+Simplex+method+works+in+Operational+Research.&logo=lu%3ACalculator&mode=dark&theme=emerald&align=left" />
 </p>
 
 <p align="center">
   <img alt="built in" src="https://shieldcn.dev/flag/br.svg" />
   <a href="https://github.com/Edgarcsr/simplex-resolver"><img alt="repo views" src="https://shieldcn.dev/views/repo/Edgarcsr/simplex-resolver.svg?variant=outline" /></a>
-  <a href="edgarcsr-simplex-resolver.vercel.app"><img alt="badge" src="https://shieldcn.dev/badge/Deployed%20on%20Vercel.svg?logo=vercel" /></a>
+  <a href="https://edgarcsr-simplex-resolver.vercel.app"><img alt="badge" src="https://shieldcn.dev/badge/Deployed%20on%20Vercel.svg?logo=vercel" /></a>
 </p>
 
 ## Overview
 
-An interactive website aimed towards operational research students to have a better understanding of how the simplex method works. Currently this version is focused in Brazilian Portuguese language.
+An interactive website aimed towards operational research students to have a better understanding of how the simplex method works. Currently this version is focused in Brazilian Portuguese language. [Access deployed site](https://edgarcsr-simplex-resolver.vercel.app)
 
 <p align="center">
   <img alt="chart" src="https://shieldcn.dev/chart/github/issues/edgarcsr/simplex-resolver.svg?theme=emerald&logo=false" />
-</p> 
+</p>
 
 ## Example Problem
 
