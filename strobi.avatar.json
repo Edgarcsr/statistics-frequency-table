@@ -25,15 +25,15 @@
       },
       "eyes": {
         "left": {
-          "width": 20,
-          "height": 50,
+          "width": 28,
+          "height": 62,
           "x": 0,
           "y": -7,
           "angle": 0
         },
         "right": {
-          "width": 20,
-          "height": 50,
+          "width": 28,
+          "height": 62,
           "x": 0,
           "y": -7,
           "angle": 0
@@ -868,6 +868,24 @@
     "uneasy-left"
   ],
   "animations": {
+    "logo-blink": {
+      "playbackMode": "loop",
+      "steps": [
+        {
+          "expression": "neutral",
+          "holdMs": 3600,
+          "transitionMs": 500,
+          "transition": "smooth"
+        }
+      ],
+      "blink": {
+        "enabled": true,
+        "initialDelayMs": 2000,
+        "minIntervalMs": 2800,
+        "maxIntervalMs": 5600,
+        "durationMs": 220
+      }
+    },
     "sleeping": {
       "playbackMode": "loop",
       "steps": [
@@ -1705,6 +1723,7 @@
     }
   },
   "animationOrder": [
+    "logo-blink",
     "sleeping",
     "waking",
     "idle",
