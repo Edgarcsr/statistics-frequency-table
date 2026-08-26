@@ -1,18 +1,20 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { flushSync } from 'react-dom'
 import {
   getDefaultProblem,
   buildInitialTableau,
   solveStepByStep,
-  type SimplexTableau,
+  type SimplexProblem,
   type SimplexStep,
 } from '#/lib/simplex.ts'
 import { SimplexTable } from '#/components/simplex-table.tsx'
 import { startIntroTour, startFillTour, FILL_STEPS, destroyTour } from '#/components/tour.tsx'
 import { Button } from '#/components/ui/button.tsx'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card.tsx'
-import { GraduationCap, Play, Eraser } from 'lucide-react'
+import { Tooltip, TooltipTrigger, TooltipContent } from '#/components/ui/tooltip.tsx'
+import { GraduationCap, Play, Eraser, SquarePlus, X } from 'lucide-react'
+import { cn } from '#/lib/utils.ts'
 
 export const Route = createFileRoute('/')({ component: Home })
 
@@ -20,18 +22,134 @@ function blankTourCells(matrix: number[][]): number[][] {
   return matrix.map((row) => row.map(() => 0))
 }
 
-function Home() {
-  const problem = getDefaultProblem()
-  const initialTableau = buildInitialTableau(problem)
+function normalizeProblem(p: SimplexProblem): SimplexProblem {
+  return {
+    ...p,
+    objectiveFn: `Z = ${p.varNames.map((name, j) => `${p.objective[j]}${name}`).join(' + ')}`,
+  }
+}
 
-  const [tableau] = useState<SimplexTableau>(initialTableau)
-  const [values, setValues] = useState<number[][]>(() => blankTourCells(initialTableau.matrix))
+function ObjectiveToggle({
+  maximize,
+  onChange,
+}: {
+  maximize: boolean
+  onChange: (maximize: boolean) => void
+}) {
+  return (
+    <div className="flex items-center rounded-md bg-muted p-0.5" role="group" aria-label="Objetivo da função">
+      <button
+        type="button"
+        onClick={() => onChange(true)}
+        aria-pressed={maximize}
+        className={cn(
+          'h-7 rounded-[min(var(--radius-md),8px)] px-3 text-xs font-medium transition-colors',
+          maximize
+            ? 'bg-background text-foreground shadow-xs'
+            : 'text-muted-foreground hover:text-foreground',
+        )}
+      >
+        Max
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange(false)}
+        aria-pressed={!maximize}
+        className={cn(
+          'h-7 rounded-[min(var(--radius-md),8px)] px-3 text-xs font-medium transition-colors',
+          !maximize
+            ? 'bg-background text-foreground shadow-xs'
+            : 'text-muted-foreground hover:text-foreground',
+        )}
+      >
+        Min
+      </button>
+    </div>
+  )
+}
+
+function Home() {
+  const [problem, setProblem] = useState<SimplexProblem>(() =>
+    normalizeProblem(getDefaultProblem()),
+  )
+  const tableau = useMemo(() => buildInitialTableau(problem), [problem])
+
+  const [values, setValues] = useState<number[][]>(() => blankTourCells(tableau.matrix))
   const [filledCells, setFilledCells] = useState<Set<string>>(new Set())
   const [phase, setPhase] = useState<'idle' | 'filling' | 'ready' | 'solving'>('idle')
   const [steps, setSteps] = useState<SimplexStep[]>([])
   const [currentStep, setCurrentStep] = useState(0)
   const [highlight, setHighlight] = useState<{ row: number; col: number }[]>([])
   const [introTourActive, setIntroTourActive] = useState(false)
+
+  useEffect(() => {
+    setValues(blankTourCells(tableau.matrix))
+    setFilledCells(new Set())
+  }, [tableau])
+
+  const handleToggleMaximize = useCallback((maximize: boolean) => {
+    setProblem((prev) => normalizeProblem({ ...prev, maximize }))
+  }, [])
+
+  const handleAddVariable = useCallback(() => {
+    setProblem((prev) => {
+      if (prev.varNames.length >= 10) return prev
+      const nextIndex = prev.varNames.length
+      const name = nextIndex < 26 ? String.fromCharCode(65 + nextIndex) : `V${nextIndex + 1}`
+      return normalizeProblem({
+        ...prev,
+        varNames: [...prev.varNames, name],
+        objective: [...prev.objective, 0],
+        constraints: prev.constraints.map((c) => ({
+          ...c,
+          coefficients: [...c.coefficients, 0],
+        })),
+      })
+    })
+  }, [])
+
+  const handleRemoveVariable = useCallback(() => {
+    setProblem((prev) => {
+      if (prev.varNames.length <= 2) return prev
+      const last = prev.varNames.length - 1
+      return normalizeProblem({
+        ...prev,
+        varNames: prev.varNames.slice(0, last),
+        objective: prev.objective.slice(0, last),
+        constraints: prev.constraints.map((c) => ({
+          ...c,
+          coefficients: c.coefficients.slice(0, last),
+        })),
+      })
+    })
+  }, [])
+
+  const handleAddConstraint = useCallback(() => {
+    setProblem((prev) => {
+      if (prev.constraints.length >= 10) return prev
+      return normalizeProblem({
+        ...prev,
+        constraints: [
+          ...prev.constraints,
+          {
+            coefficients: new Array(prev.varNames.length).fill(0),
+            label: `R${prev.constraints.length + 1}`,
+            rhs: 0,
+          },
+        ],
+      })
+    })
+  }, [])
+
+  const handleRemoveConstraint = useCallback(() => {
+    setProblem((prev) => {
+      if (prev.constraints.length <= 1) return prev
+      return normalizeProblem({
+        ...prev,
+        constraints: prev.constraints.slice(0, -1),
+      })
+    })
+  }, [])
 
   const handleStartTour = useCallback(() => {
     flushSync(() => setIntroTourActive(true))
@@ -99,22 +217,22 @@ function Home() {
   }, [currentStep, steps])
 
   const handleReset = useCallback(() => {
-    setValues(blankTourCells(initialTableau.matrix))
-    setFilledCells(new Set())
     setPhase('idle')
     setSteps([])
     setCurrentStep(0)
     setHighlight([])
     setIntroTourActive(false)
     destroyTour()
-  }, [initialTableau])
+  }, [])
 
   const handleClear = useCallback(() => {
-    setValues(blankTourCells(initialTableau.matrix))
+    setValues(blankTourCells(tableau.matrix))
     setFilledCells(new Set())
-  }, [initialTableau])
+  }, [tableau])
 
   const isOptimal = steps.length > 0 && currentStep === steps.length - 1
+
+  const canEditStructure = phase === 'idle' || phase === 'filling'
 
   const currentTableau =
     phase === 'solving' && steps[currentStep]
@@ -126,22 +244,27 @@ function Home() {
       <div className="my-auto -translate-y-12 w-full max-w-4xl py-12 px-6 flex flex-col items-center gap-8">
         {/* Problema */}
         {(introTourActive || phase === 'filling') && (
-          <Card
-            className="w-full max-w-2xl gap-0 py-3"
-            data-simplex-problem
-          >
+          <Card className="w-full max-w-2xl gap-0 py-3" data-simplex-problem>
             <CardHeader className="pb-1">
               <CardTitle className="text-sm">{problem.title}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                {problem.context}
-              </p>
+              {problem.context && (
+                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                  {problem.context}
+                </p>
+              )}
               <div className="rounded-md bg-muted p-2 font-mono text-xs space-y-1">
-                <p className="font-semibold">Max {problem.objectiveFn}</p>
+                <p className="font-semibold">
+                  {problem.maximize ? 'Max' : 'Min'} {problem.objectiveFn}
+                </p>
                 {problem.constraints.map((c, i) => (
                   <p key={i} className="text-muted-foreground">
-                    {c.label}: {c.coefficients.map((val, j) => `${val}${problem.varNames[j]}`).join(' + ')} ≤ {c.rhs}
+                    {c.label}:{' '}
+                    {c.coefficients
+                      .map((val, j) => `${val}${problem.varNames[j]}`)
+                      .join(' + ')}{' '}
+                    ≤ {c.rhs}
                   </p>
                 ))}
               </div>
@@ -150,44 +273,119 @@ function Home() {
         )}
 
         {/* Tabela */}
-        <div className="w-full max-w-3xl mx-auto flex flex-col gap-2">
+        <div className="w-full max-w-4xl mx-auto flex flex-col gap-2">
           <h2 className="text-lg font-bold">Tabela Simplex</h2>
           <p className="text-sm text-muted-foreground -mt-1.5">
             Preencha as células com os dados do problema.
           </p>
-          <div className="mt-3">
-            <Card className="w-full py-0 overflow-hidden">
-<SimplexTable
-              tableau={currentTableau}
-              values={phase === 'solving' ? currentTableau.matrix : values}
-              onChange={handleManualFill}
-                editable={phase === 'idle' || phase === 'filling'}
-                highlight={highlight}
-                pivotCell={phase === 'solving' ? steps[currentStep]?.tableau.pivot : undefined}
-                filledCells={filledCells}
-                step={currentStep}
-              />
+          <div className="mt-3 flex items-stretch gap-1.5">
+            <Card className="flex-1 min-w-0 py-0 overflow-hidden">
+              <div className="overflow-x-auto">
+                <SimplexTable
+                  tableau={currentTableau}
+                  values={phase === 'solving' ? currentTableau.matrix : values}
+                  onChange={handleManualFill}
+                  editable={phase === 'idle' || phase === 'filling'}
+                  highlight={highlight}
+                  pivotCell={phase === 'solving' ? steps[currentStep]?.tableau.pivot : undefined}
+                  filledCells={filledCells}
+                  step={currentStep}
+                />
+              </div>
             </Card>
+
+            {canEditStructure && (
+              <div className="flex flex-col justify-center gap-1 shrink-0">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label="Adicionar variável"
+                      disabled={problem.varNames.length >= 10}
+                      onClick={handleAddVariable}
+                    >
+                      <SquarePlus />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Adicionar variável</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label="Remover variável"
+                      disabled={problem.varNames.length <= 2}
+                      onClick={handleRemoveVariable}
+                    >
+                      <X />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Remover variável</TooltipContent>
+                </Tooltip>
+
+                <div className="mx-1.5 h-px bg-border" />
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label="Adicionar restrição"
+                      disabled={problem.constraints.length >= 10}
+                      onClick={handleAddConstraint}
+                    >
+                      <SquarePlus />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Adicionar restrição</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label="Remover restrição"
+                      disabled={problem.constraints.length <= 1}
+                      onClick={handleRemoveConstraint}
+                    >
+                      <X />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Remover restrição</TooltipContent>
+                </Tooltip>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Controles */}
         <div className="w-full flex flex-col items-center gap-3">
           {phase === 'idle' && (
-            <div className="flex w-full max-w-3xl justify-between">
-              <Button variant="ghost" size="sm" onClick={handleStartTour}>
-                Iniciar Tutorial
-                <GraduationCap />
-              </Button>
-              <Button size="sm" onClick={handleSolve}>
-                Resolver
-                <Play />
-              </Button>
+            <div className="flex w-full max-w-4xl justify-between items-center">
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="sm" onClick={handleStartTour}>
+                  Iniciar Tutorial
+                  <GraduationCap />
+                </Button>
+                <Button variant="ghost" size="sm" onClick={handleClear}>
+                  Limpar
+                  <Eraser />
+                </Button>
+              </div>
+              <div className="flex items-center gap-2">
+                <ObjectiveToggle maximize={problem.maximize} onChange={handleToggleMaximize} />
+                <Button size="sm" onClick={handleSolve}>
+                  Resolver
+                  <Play />
+                </Button>
+              </div>
             </div>
           )}
 
           {phase === 'filling' && (
-            <div className="flex w-full max-w-3xl justify-between">
+            <div className="flex w-full max-w-4xl justify-between">
               <Button variant="ghost" size="sm" onClick={handleStartTour}>
                 Iniciar Tutorial
                 <GraduationCap />

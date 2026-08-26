@@ -178,7 +178,9 @@ export function solveStepByStep(problem: SimplexProblem): SimplexStep[] {
       .join(', ')
     steps.push({
       tableau,
-      description: `Solução ótima! Produza ${solStr}. Lucro máximo: R$ ${zVal}`,
+      description: `Solução ótima! Produza ${solStr}. ${
+        problem.maximize ? 'Lucro máximo' : 'Valor mínimo'
+      }: ${zVal}`,
     })
   }
 
