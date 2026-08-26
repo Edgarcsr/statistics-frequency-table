@@ -1,4 +1,4 @@
-import { type SimplexTableau } from '#/lib/simplex.ts'
+import { type RatioRow, type SimplexTableau } from '#/lib/simplex.ts'
 import {
   Table,
   TableBody,
@@ -17,6 +17,9 @@ interface SimplexTableProps {
   pivotCell?: { row: number; col: number }
   filledCells?: Set<string>
   step?: number
+  enteringCol?: number
+  leavingRow?: number
+  ratios?: RatioRow[]
 }
 
 export function SimplexTable({
@@ -28,6 +31,9 @@ export function SimplexTable({
   pivotCell,
   filledCells = new Set(),
   step,
+  enteringCol,
+  leavingRow,
+  ratios,
 }: SimplexTableProps) {
   const isHighlighted = (row: number, col: number) =>
     highlight.some((h) => h.row === row && h.col === col)
@@ -42,6 +48,8 @@ export function SimplexTable({
 
   const isEditableCell = () => editable
 
+  const ratioForRow = (row: number) => ratios?.find((r) => r.row === row)
+
   return (
     <div data-simplex-table={step}>
       <Table>
@@ -53,30 +61,50 @@ export function SimplexTable({
             {tableau.headers.map((h, j) => (
               <TableHead
                 key={j}
-                className="font-bold text-center min-w-[100px] text-xs uppercase tracking-widest text-muted-foreground"
+                className={`font-bold text-center min-w-[100px] text-xs uppercase tracking-widest transition-colors duration-150 ${
+                  enteringCol === j
+                    ? 'text-primary bg-primary/10'
+                    : 'text-muted-foreground'
+                }`}
                 data-col={h}
+                title={
+                  enteringCol === j
+                    ? `Coluna entrante: ${h}`
+                    : h === 'Sol'
+                      ? 'Sol: valor atual da variável básica de cada linha'
+                      : undefined
+                }
               >
                 {h}
               </TableHead>
             ))}
+            {ratios && (
+              <TableHead className="font-bold text-center min-w-[100px] text-xs uppercase tracking-widest text-muted-foreground">
+                Razão
+              </TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
           {values.map((row, i) => (
             <TableRow
               key={i}
-              className={
+              className={`transition-colors duration-150 ${
                 isZRow(i)
                   ? 'border-t border-border/50 bg-muted/30'
-                  : 'border-border/30'
-              }
+                  : leavingRow === i
+                    ? 'border-border/30 bg-primary/5'
+                    : 'border-border/30'
+              }`}
             >
               <TableCell
                 className={`font-bold text-center text-sm ${
                   isZRow(i) ? 'text-foreground' : 'text-muted-foreground'
                 }`}
+                title={leavingRow === i ? `Variável de saída: ${tableau.basis[i]}` : undefined}
               >
                 {tableau.basis[i]}
+                {leavingRow === i && <span className="text-primary"> ↓</span>}
               </TableCell>
               {row.map((val, j) => {
                 const editable_ = isEditableCell()
@@ -89,7 +117,9 @@ export function SimplexTable({
                         ? 'bg-primary text-primary-foreground font-bold'
                         : isHighlighted(i, j)
                           ? 'bg-muted/50'
-                          : ''
+                          : enteringCol === j
+                            ? 'bg-primary/5'
+                            : ''
                     }`}
                     data-row={tableau.basis[i]}
                     data-col={tableau.headers[j]}
@@ -111,6 +141,22 @@ export function SimplexTable({
                   </TableCell>
                 )
               })}
+              {ratios && (
+                <TableCell
+                  className={`text-center tabular-nums text-sm font-mono ${
+                    leavingRow === i ? 'text-primary font-bold' : 'text-muted-foreground'
+                  }`}
+                >
+                  {isZRow(i)
+                    ? '—'
+                    : (() => {
+                        const r = ratioForRow(i)
+                        if (!r) return '—'
+                        if (r.ratio === null) return '—'
+                        return `${r.sol.toFixed(2)} ÷ ${r.coef.toFixed(2)} = ${r.ratio.toFixed(2)}`
+                      })()}
+                </TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>

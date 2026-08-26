@@ -21,10 +21,48 @@ export interface SimplexTableau {
   leaving?: number
 }
 
+export interface ZCandidate {
+  col: number
+  header: string
+  value: number
+}
+
+export interface RatioRow {
+  row: number
+  basisVar: string
+  sol: number
+  coef: number
+  ratio: number | null
+}
+
+export interface PivotChoice {
+  row: number
+  col: number
+  zCandidates: ZCandidate[]
+  ratios: RatioRow[]
+}
+
+export interface PivotFactor {
+  row: number
+  basisVar: string
+  factor: number
+}
+
+export interface StepExplain {
+  kind: 'initial' | 'choose-pivot' | 'after-pivot' | 'optimal'
+  enteringVar?: string
+  leavingVar?: string
+  zCandidates?: ZCandidate[]
+  ratios?: RatioRow[]
+  pivotValue?: number
+  factors?: PivotFactor[]
+}
+
 export interface SimplexStep {
   tableau: SimplexTableau
   description: string
   highlight?: { row: number; col: number }[]
+  explain?: StepExplain
 }
 
 const EPSILON = 1e-10
@@ -64,13 +102,17 @@ export function buildInitialTableau(problem: SimplexProblem): SimplexTableau {
   return { matrix, basis, headers }
 }
 
-export function findPivot(tableau: SimplexTableau): { row: number; col: number } | null {
+export function findPivot(tableau: SimplexTableau): PivotChoice | null {
   const zRow = tableau.matrix[tableau.matrix.length - 1]
   const cols = zRow.length - 1
 
+  const zCandidates: ZCandidate[] = []
   let entering = -1
   let minVal = -EPSILON
   for (let j = 0; j < cols; j++) {
+    if (zRow[j] < -EPSILON) {
+      zCandidates.push({ col: j, header: tableau.headers[j], value: zRow[j] })
+    }
     if (zRow[j] < minVal) {
       minVal = zRow[j]
       entering = j
@@ -79,25 +121,30 @@ export function findPivot(tableau: SimplexTableau): { row: number; col: number }
 
   if (entering === -1) return null
 
+  const ratios: RatioRow[] = []
   let leaving = -1
   let minRatio = Infinity
   for (let i = 0; i < tableau.matrix.length - 1; i++) {
-    const val = tableau.matrix[i][entering]
-    if (val > EPSILON) {
-      const ratio = tableau.matrix[i][tableau.matrix[i].length - 1] / val
-      if (ratio < minRatio) {
-        minRatio = ratio
-        leaving = i
-      }
+    const coef = tableau.matrix[i][entering]
+    const sol = tableau.matrix[i][tableau.matrix[i].length - 1]
+    const ratio = coef > EPSILON ? sol / coef : null
+    ratios.push({ row: i, basisVar: tableau.basis[i], sol, coef, ratio })
+    if (ratio !== null && ratio < minRatio) {
+      minRatio = ratio
+      leaving = i
     }
   }
 
   if (leaving === -1) return null
 
-  return { row: leaving, col: entering }
+  return { row: leaving, col: entering, zCandidates, ratios }
 }
 
-export function pivot(tableau: SimplexTableau, row: number, col: number): SimplexTableau {
+export function pivot(
+  tableau: SimplexTableau,
+  row: number,
+  col: number,
+): { tableau: SimplexTableau; pivotValue: number; factors: PivotFactor[] } {
   const newMatrix = tableau.matrix.map((r) => [...r])
   const newBasis = [...tableau.basis]
   const pivotVal = newMatrix[row][col]
@@ -106,9 +153,11 @@ export function pivot(tableau: SimplexTableau, row: number, col: number): Simple
     newMatrix[row][j] /= pivotVal
   }
 
+  const factors: PivotFactor[] = []
   for (let i = 0; i < newMatrix.length; i++) {
     if (i === row) continue
     const factor = newMatrix[i][col]
+    factors.push({ row: i, basisVar: tableau.basis[i], factor })
     for (let j = 0; j < newMatrix[i].length; j++) {
       newMatrix[i][j] -= factor * newMatrix[row][j]
     }
@@ -117,9 +166,9 @@ export function pivot(tableau: SimplexTableau, row: number, col: number): Simple
   newBasis[row] = tableau.headers[col]
 
   return {
-    matrix: newMatrix,
-    basis: newBasis,
-    headers: [...tableau.headers],
+    tableau: { matrix: newMatrix, basis: newBasis, headers: [...tableau.headers] },
+    pivotValue: pivotVal,
+    factors,
   }
 }
 
@@ -139,29 +188,45 @@ export function solveStepByStep(problem: SimplexProblem): SimplexStep[] {
     tableau,
     description:
       'Tabela inicial montada. As variáveis de folga (s₁, s₂) representam os recursos não utilizados de cada restrição.',
+    explain: { kind: 'initial' },
   })
 
   let iteration = 0
   while (!isOptimal(tableau) && iteration < 20) {
-    const pivotPos = findPivot(tableau)
-    if (!pivotPos) break
+    const choice = findPivot(tableau)
+    if (!choice) break
 
-    const entering = tableau.headers[pivotPos.col]
-    const leavingVar = tableau.basis[pivotPos.row]
+    const entering = tableau.headers[choice.col]
+    const leavingVar = tableau.basis[choice.row]
 
-    tableau = { ...tableau, pivot: pivotPos, entering: pivotPos.col, leaving: pivotPos.row }
+    tableau = { ...tableau, pivot: choice, entering: choice.col, leaving: choice.row }
 
     steps.push({
       tableau,
-      description: `Iteração ${iteration + 1}: ${entering} entra na base (maior custo-benefício). ${leavingVar} sai (menor razão).`,
-      highlight: [{ row: pivotPos.row, col: pivotPos.col }],
+      description: `Iteração ${iteration + 1}: ${entering} entra na base (coluna com o coeficiente mais negativo na linha Z). ${leavingVar} sai (menor razão Sol ÷ coeficiente entre as linhas elegíveis).`,
+      highlight: [{ row: choice.row, col: choice.col }],
+      explain: {
+        kind: 'choose-pivot',
+        enteringVar: entering,
+        leavingVar,
+        zCandidates: choice.zCandidates,
+        ratios: choice.ratios,
+      },
     })
 
-    tableau = pivot(tableau, pivotPos.row, pivotPos.col)
+    const { tableau: pivoted, pivotValue, factors } = pivot(tableau, choice.row, choice.col)
+    tableau = pivoted
 
     steps.push({
       tableau,
-      description: `Após pivotear: ${tableau.basis[pivotPos.row]} agora está na base. Recurso alocado de forma mais eficiente.`,
+      description: `Após pivotear: divide-se a linha de ${leavingVar} pelo elemento pivô (${pivotValue.toFixed(2)}), e cada outra linha subtrai um múltiplo dessa nova linha para zerar a coluna de ${entering}. ${entering} agora está na base.`,
+      explain: {
+        kind: 'after-pivot',
+        enteringVar: entering,
+        leavingVar,
+        pivotValue,
+        factors,
+      },
     })
 
     iteration++
@@ -181,6 +246,7 @@ export function solveStepByStep(problem: SimplexProblem): SimplexStep[] {
       description: `Solução ótima! Produza ${solStr}. ${
         problem.maximize ? 'Lucro máximo' : 'Valor mínimo'
       }: ${zVal}`,
+      explain: { kind: 'optimal' },
     })
   }
 

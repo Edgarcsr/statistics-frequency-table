@@ -9,6 +9,7 @@ import {
   type SimplexStep,
 } from '#/lib/simplex.ts'
 import { SimplexTable } from '#/components/simplex-table.tsx'
+import { StepExplanation } from '#/components/step-explanation.tsx'
 import { startIntroTour, startFillTour, destroyTour } from '#/components/tour.tsx'
 import { Button } from '#/components/ui/button.tsx'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card.tsx'
@@ -238,8 +239,18 @@ function Home() {
       : tableau
 
   return (
-    <div className="min-h-[calc(100dvh-3.5rem)] flex flex-col items-center">
-      <div className="my-auto -translate-y-12 w-full max-w-4xl py-12 px-6 flex flex-col items-center gap-8">
+    <div
+      className={cn(
+        'min-h-[calc(100dvh-3.5rem)] flex flex-col items-center',
+        phase !== 'solving' && 'justify-center',
+      )}
+    >
+      <div
+        className={cn(
+          'w-full max-w-4xl py-12 px-6 flex flex-col items-center gap-8',
+          phase !== 'solving' && '-translate-y-12',
+        )}
+      >
         {/* Problema */}
         {(introTourActive || phase === 'filling') && (
           <Card className="w-full max-w-2xl gap-0 py-3" data-simplex-problem>
@@ -274,6 +285,21 @@ function Home() {
                   pivotCell={phase === 'solving' ? steps[currentStep]?.tableau.pivot : undefined}
                   filledCells={filledCells}
                   step={currentStep}
+                  enteringCol={
+                    phase === 'solving' && steps[currentStep]?.explain?.kind === 'choose-pivot'
+                      ? steps[currentStep].tableau.entering
+                      : undefined
+                  }
+                  leavingRow={
+                    phase === 'solving' && steps[currentStep]?.explain?.kind === 'choose-pivot'
+                      ? steps[currentStep].tableau.leaving
+                      : undefined
+                  }
+                  ratios={
+                    phase === 'solving' && steps[currentStep]?.explain?.kind === 'choose-pivot'
+                      ? steps[currentStep].explain?.ratios
+                      : undefined
+                  }
                 />
               </div>
             </Card>
@@ -411,9 +437,10 @@ function Home() {
         {phase === 'solving' && steps[currentStep] && (
           <Card className="w-full max-w-2xl" key={currentStep}>
             <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {steps[currentStep].description}
-              </p>
+              <StepExplanation
+                description={steps[currentStep].description}
+                explain={steps[currentStep].explain}
+              />
             </CardContent>
           </Card>
         )}
