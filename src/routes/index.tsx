@@ -9,7 +9,7 @@ import {
   type SimplexStep,
 } from '#/lib/simplex.ts'
 import { SimplexTable } from '#/components/simplex-table.tsx'
-import { startIntroTour, startFillTour, FILL_STEPS, destroyTour } from '#/components/tour.tsx'
+import { startIntroTour, startFillTour, destroyTour } from '#/components/tour.tsx'
 import { Button } from '#/components/ui/button.tsx'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card.tsx'
 import { Tooltip, TooltipTrigger, TooltipContent } from '#/components/ui/tooltip.tsx'
@@ -159,24 +159,22 @@ function Home() {
         setPhase('filling')
         setTimeout(() => {
           startFillTour(
-            (index) => {
-              const cellStep = FILL_STEPS[index]
-              if (cellStep) {
-                const [r, c] = cellStep.cell.split('-').map(Number)
-                setValues((prev) => {
-                  const next = prev.map((row) => [...row])
-                  next[r][c] = cellStep.answer
-                  return next
-                })
-                setFilledCells((prev) => new Set([...prev, cellStep.cell]))
-              }
+            problem,
+            (step) => {
+              const [r, c] = step.cell.split('-').map(Number)
+              setValues((prev) => {
+                const next = prev.map((row) => [...row])
+                next[r][c] = step.answer
+                return next
+              })
+              setFilledCells((prev) => new Set([...prev, step.cell]))
             },
             () => setPhase('ready'),
           )
         }, 400)
       },
     )
-  }, [])
+  }, [problem])
 
   const handleManualFill = useCallback((row: number, col: number, raw: string) => {
     const num = raw === '' ? 0 : parseFloat(raw)

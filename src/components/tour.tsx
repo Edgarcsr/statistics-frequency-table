@@ -1,73 +1,107 @@
 import { driver, type Driver } from 'driver.js'
 import 'driver.js/dist/driver.css'
+import { type SimplexProblem } from '#/lib/simplex.ts'
 
 let driverInstance: Driver | null = null
 
-interface CellStep {
+export interface CellStep {
   cell: string
   title: string
   description: string
   answer: number
 }
 
-export const FILL_STEPS: CellStep[] = [
-  {
-    cell: '0-0',
+const ORIGINAL_STEPS: Record<string, { title: string; description: string }> = {
+  'c0-v0': {
     title: 'Restrição 1 → Coluna A',
     description:
       'A cadeira A gasta 2 horas de marcenaria por unidade, então colocamos 2 aqui.',
-    answer: 2,
   },
-  {
-    cell: '0-1',
+  'c0-v1': {
     title: 'Restrição 1 → Coluna B',
     description:
       'A mesa B gasta 1 hora de marcenaria por unidade, então colocamos 1 aqui.',
-    answer: 1,
   },
-  {
-    cell: '0-4',
+  'c0-sol': {
     title: 'Restrição 1 → Solução',
     description:
       'A fábrica tem 120 horas de marcenaria disponíveis por semana, então o total é 120.',
-    answer: 120,
   },
-  {
-    cell: '1-0',
+  'c1-v0': {
     title: 'Restrição 2 → Coluna A',
     description:
       'A cadeira A gasta 1 hora de acabamento por unidade, então colocamos 1 aqui.',
-    answer: 1,
   },
-  {
-    cell: '1-1',
+  'c1-v1': {
     title: 'Restrição 2 → Coluna B',
     description:
       'A mesa B gasta 3 horas de acabamento por unidade, então colocamos 3 aqui.',
-    answer: 3,
   },
-  {
-    cell: '1-3',
+  'c1-sol': {
     title: 'Restrição 2 → Solução',
     description:
       'A fábrica tem 90 horas de acabamento disponíveis por semana, então o total é 90.',
-    answer: 90,
   },
-  {
-    cell: '2-0',
+  'z-v0': {
     title: 'Função Objetivo → Coluna A',
     description:
       'O lucro da cadeira A é R$ 40, mas na tabela Simplex entramos com o negativo: -40.',
-    answer: -40,
   },
-  {
-    cell: '2-1',
+  'z-v1': {
     title: 'Função Objetivo → Coluna B',
     description:
       'O lucro da mesa B é R$ 60, mas na tabela Simplex entramos com o negativo: -60.',
-    answer: -60,
   },
-]
+}
+
+export function generateFillSteps(problem: SimplexProblem): CellStep[] {
+  const nVars = problem.varNames.length
+  const nConstraints = problem.constraints.length
+  const solCol = nVars + nConstraints
+  const zRow = nConstraints
+
+  const steps: CellStep[] = []
+
+  problem.constraints.forEach((constraint, i) => {
+    constraint.coefficients.forEach((coef, j) => {
+      const original = ORIGINAL_STEPS[`c${i}-v${j}`]
+      steps.push({
+        cell: `${i}-${j}`,
+        title: original?.title ?? `${constraint.label} → Coluna ${problem.varNames[j]}`,
+        description:
+          original?.description ??
+          `O coeficiente de ${problem.varNames[j]} na restrição ${constraint.label} é ${coef}.`,
+        answer: coef,
+      })
+    })
+    const solOriginal = ORIGINAL_STEPS[`c${i}-sol`]
+    steps.push({
+      cell: `${i}-${solCol}`,
+      title: solOriginal?.title ?? `${constraint.label} → Solução`,
+      description:
+        solOriginal?.description ??
+        `O lado direito da restrição ${constraint.label} é ${constraint.rhs}.`,
+      answer: constraint.rhs,
+    })
+  })
+
+  problem.objective.forEach((coef, j) => {
+    const answer = problem.maximize ? -coef : coef
+    const original = ORIGINAL_STEPS[`z-v${j}`]
+    steps.push({
+      cell: `${zRow}-${j}`,
+      title: original?.title ?? `Função Objetivo → Coluna ${problem.varNames[j]}`,
+      description:
+        problem.maximize
+          ? (original?.description ??
+            `Na linha Z, o valor de ${problem.varNames[j]} entra com o sinal invertido: ${answer}.`)
+          : `Na linha Z (minimização), o coeficiente de ${problem.varNames[j]} entra como ${answer}.`,
+      answer,
+    })
+  })
+
+  return steps
+}
 
 export function getIntroSteps() {
   return [
@@ -92,8 +126,8 @@ export function getIntroSteps() {
   ]
 }
 
-export function getCellSteps() {
-  return FILL_STEPS.map((step) => ({
+function getCellSteps(fillSteps: CellStep[]) {
+  return fillSteps.map((step) => ({
     element: `[data-cell="${step.cell}"]`,
     popover: {
       title: step.title,
@@ -130,13 +164,17 @@ export function startIntroTour(onDone: () => void, onStepChange?: (index: number
   driverInstance.drive()
 }
 
-export function startFillTour(onCorrect: (index: number) => void, onComplete: () => void) {
+export function startFillTour(
+  problem: SimplexProblem,
+  onCorrect: (step: CellStep) => void,
+  onComplete: () => void,
+) {
   destroyTour()
 
-  const steps = getCellSteps()
+  const fillSteps = generateFillSteps(problem)
 
   driverInstance = driver({
-    steps,
+    steps: getCellSteps(fillSteps),
     animate: true,
     overlayColor: 'rgba(0, 0, 0, 0.8)',
     overlayOpacity: 0.85,
@@ -151,9 +189,9 @@ export function startFillTour(onCorrect: (index: number) => void, onComplete: ()
     disableButtons: ['next'],
     onNextClick: (_element, _step, opts) => {
       const activeIndex = opts.state.activeIndex ?? 0
-      const cellStep = FILL_STEPS[activeIndex]
+      const cellStep = fillSteps[activeIndex]
       if (cellStep) {
-        onCorrect(activeIndex)
+        onCorrect(cellStep)
       }
       opts.driver.moveNext()
     },
