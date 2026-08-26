@@ -250,24 +250,10 @@ function Home() {
             </CardHeader>
             <CardContent className="space-y-2">
               {problem.context && (
-                <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                <p className="text-xs text-muted-foreground leading-relaxed">
                   {problem.context}
                 </p>
               )}
-              <div className="rounded-md bg-muted p-2 font-mono text-xs space-y-1">
-                <p className="font-semibold">
-                  {problem.maximize ? 'Max' : 'Min'} {problem.objectiveFn}
-                </p>
-                {problem.constraints.map((c, i) => (
-                  <p key={i} className="text-muted-foreground">
-                    {c.label}:{' '}
-                    {c.coefficients
-                      .map((val, j) => `${val}${problem.varNames[j]}`)
-                      .join(' + ')}{' '}
-                    ≤ {c.rhs}
-                  </p>
-                ))}
-              </div>
             </CardContent>
           </Card>
         )}
