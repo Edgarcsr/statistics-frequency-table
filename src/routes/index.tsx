@@ -289,11 +289,11 @@ function Home() {
           </Card>
         </div>
       )}
-      <div className="w-full max-w-4xl py-12 px-6 flex flex-col items-center gap-8">
-        {/* Problema — sempre montado, com espaço reservado, para a tabela abaixo nunca mudar de posição entre as fases */}
+      <div className="w-full max-w-4xl px-6 flex flex-col items-center gap-4 md:gap-8 py-6 md:py-12">
+        {/* Problema — sempre montado pra tabela não pular; mobile compacto (py-2 + conteúdo menor) em vez de sumir */}
         <Card
           className={cn(
-            'w-full max-w-2xl gap-0 py-3',
+            'w-full max-w-2xl gap-0 py-2 md:py-3',
             !(introTourActive || phase === 'filling') && 'invisible',
           )}
           data-simplex-problem
@@ -316,7 +316,7 @@ function Home() {
           <p className="text-sm text-muted-foreground -mt-1.5">
             Preencha as células com os dados do problema.
           </p>
-          <div className="mt-3 flex items-stretch gap-1.5">
+          <div className="mt-1 md:mt-3 flex items-stretch gap-1.5">
             <Card className="flex-1 min-w-0 py-0 overflow-hidden">
               <div className="overflow-x-auto">
                 <SimplexTable

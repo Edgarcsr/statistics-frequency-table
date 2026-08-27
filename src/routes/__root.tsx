@@ -3,6 +3,7 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import { Header } from '../components/header'
+import { Footer } from '../components/footer'
 import appCss from '../styles.css?url'
 
 export const Route = createRootRoute({
@@ -44,6 +45,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <div className="flex min-h-dvh flex-col">
           <Header />
           <div className="flex flex-1 flex-col">{children}</div>
+          <Footer />
         </div>
         <TanStackDevtools
           config={{
