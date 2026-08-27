@@ -421,19 +421,21 @@ function Home() {
             <Button
               variant="ghost"
               size="sm"
+              aria-label="Iniciar tutorial"
               disabled={phase !== 'idle' && phase !== 'filling'}
               onClick={handleStartTour}
             >
-              Iniciar Tutorial
+              <span className="hidden sm:inline">Iniciar Tutorial</span>
               <GraduationCap />
             </Button>
             <Button
               variant={phase === 'filling' ? 'outline' : 'ghost'}
               size="sm"
+              aria-label="Limpar tabela"
               disabled={!canClear}
               onClick={handleClear}
             >
-              Limpar
+              <span className="hidden sm:inline">Limpar</span>
               <Eraser />
             </Button>
           </div>
@@ -481,8 +483,8 @@ function Home() {
                 </Tooltip>
               </div>
             ) : (
-              <Button size="sm" onClick={handleSolve} data-simplex-solve>
-                Resolver
+              <Button size="sm" aria-label="Resolver" onClick={handleSolve} data-simplex-solve>
+                <span className="hidden sm:inline">Resolver</span>
                 <Play />
               </Button>
             )}

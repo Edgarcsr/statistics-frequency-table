@@ -55,7 +55,7 @@ export function SimplexTable({
       <Table>
         <TableHeader>
           <TableRow className="border-b border-border/50">
-            <TableHead className="font-bold text-center min-w-20 text-xs uppercase tracking-widest text-muted-foreground">
+            <TableHead className="sticky left-0 z-10 bg-background border-r border-border font-bold text-center min-w-20 text-xs uppercase tracking-widest text-muted-foreground">
               Base
             </TableHead>
             {tableau.headers.map((h, j) => (
@@ -99,8 +99,8 @@ export function SimplexTable({
               }`}
             >
               <TableCell
-                className={`font-bold text-center text-sm ${
-                  isZRow(i) ? 'text-foreground' : 'text-muted-foreground'
+                className={`sticky left-0 z-10 border-r border-border font-bold text-center text-sm ${
+                  isZRow(i) ? 'bg-muted/30 text-foreground' : 'bg-background text-muted-foreground'
                 }`}
                 title={leavingRow === i ? `Variável de saída: ${tableau.basis[i]}` : undefined}
               >
