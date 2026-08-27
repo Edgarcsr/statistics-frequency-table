@@ -1,7 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
 
-export const Route = createFileRoute('/metodo')({ component: Metodo })
+export const Route = createFileRoute('/metodo')({
+  component: Metodo,
+  head: () => ({
+    meta: [{ title: 'Simplex Resolver | Método' }],
+  }),
+})
 
 function Code({ children }: { children: React.ReactNode }) {
   return (

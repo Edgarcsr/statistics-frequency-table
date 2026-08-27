@@ -26,7 +26,12 @@ import {
 } from 'lucide-react'
 import { cn } from '#/lib/utils.ts'
 
-export const Route = createFileRoute('/')({ component: Home })
+export const Route = createFileRoute('/')({
+  component: Home,
+  head: () => ({
+    meta: [{ title: 'Simplex Resolver' }],
+  }),
+})
 
 function blankTourCells(matrix: number[][]): number[][] {
   return matrix.map((row) => row.map(() => 0))
