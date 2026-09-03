@@ -8,45 +8,46 @@ web
 
 ## Stack
 
-TanStack Start (file-based routing), React 19, shadcn/ui (new-york style, zinc base), Tailwind CSS 4, driver.js, TypeScript, Vite 8.
+TanStack Start (file-based routing), React 19, shadcn/ui (new-york style, zinc base, tema primário teal), Tailwind CSS 4, TypeScript, Vite 8, Vitest.
 
 ## Users
 
-Estudantes de pesquisa operacional, administração, engenharia, ou cursos correlatos que precisam aprender o método Simplex de programação linear.
+Estudantes de estatística, ensino médio e ensino superior, que precisam montar uma tabela de frequências e calcular medidas de tendência central e dispersão para um trabalho escolar.
 
 ## Product Purpose
 
-Ensinar o método Simplex de forma interativa e visual. O usuário visualiza um problema de otimização, vê os dados sendo extraídos passo a passo, monta a tabela Simplex guiado, e calcula a solução. O aprendizado é construído sob demanda, não apenas assistido.
+Apresentar, de forma visual e interativa, a construção da tabela de frequências para dados agrupados em classes e o cálculo das medidas estatísticas. O usuário edita os dados brutos e vê a tabela completa e os resultados atualizados ao vivo.
 
 ## Positioning
 
-Tutorial interativo que decompõe o problema Simplex em etapas visuais com driver.js, em vez de explicar teoria em texto estático. A tabela é o centro da experiência.
+Ferramenta que transforma dados brutos em tabela de frequências completa e medidas estatísticas em um clique, com fórmulas documentadas, em vez de cálculo manual em caderno.
 
 ## Operating Context
 
-- Estudante abre o site → vê problema descrito + tabela Simplex centralizada
-- Tutorial driver.js guia: extrair dados do problema → preencher tabela → iterar → encontrar solução
-- Cada passo mostra o que mudou e por quê
+- Estudante abre o site → vê o campo de alturas pré-preenchido
+- Edita os dados (separados por espaço, vírgula ou quebra de linha) → resultados recalculam ao vivo
+- Vê cards com média, moda, mediana, variância e desvio padrão
+- Consulta a página "Documentação" para revisar as fórmulas
 
 ## Capabilities and Constraints
 
-- Tabela Simplex centralizada na tela inicial
-- Tutorial com driver.js (spotlight + tooltip)
-- Extração de dados do problema para a tabela
-- Cálculo iterativo da solução (pivot, ratio test, entering/leaving variables)
-- shadcn/ui para componentes (Table, Button, Card, Dialog)
+- Editor de dados brutos com validação
+- Agrupamento em classes pela regra de Sturges
+- Tabela de frequências completa: fi, fr, fr%, Fi, Fi%, xi, xi·fi, totais
+- Média, moda (Czuber), mediana, variância (populacional e amostral) e desvio padrão
+- Lógica de cálculo em arquivos separados em `src/utils/`
 - Somente web, sem backend
 
 ## Brand Commitments
 
-Projeto educacional, sem marca definida. Nome do projeto: simplex-resolver.
+Projeto educacional, sem marca definida. Nome do projeto: statistics-frequency-table.
 
 ## Evidence on Hand
 
-README com estrutura proposta, stack definida, componentes shadcn já configurados.
+README com estrutura, stack definida, lógica de cálculo em `src/utils/`, testes Vitest.
 
 ## Product Principles
 
-1. Aprender fazendo - cada passo é interativo, não passivo
-2. Tabela é o foco visual - tudo gira em torno da matriz Simplex
-3. Transparência no cálculo - mostrar pivot, razão, variáveis entrando/saindo
+1. Transparência no cálculo - fórmulas documentadas na página Método
+2. Resultado imediato - edição ao vivo, sem botão de "calcular"
+3. Código didático - um arquivo por medida, fácil de ler e apresentar

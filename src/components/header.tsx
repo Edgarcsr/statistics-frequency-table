@@ -40,7 +40,7 @@ export function Header() {
         <div ref={avatarRef}>
           <Avatar size={40} defaultAnimation="logo-blink" />
         </div>
-        <span className="font-bold text-base">Simplex Resolver</span>
+        <span className="font-bold text-base">Tabela de Frequências</span>
       </Link>
       <nav className="flex items-center gap-1">
         <Button variant="ghost" size="sm" asChild>

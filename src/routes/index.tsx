@@ -1,506 +1,78 @@
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { flushSync } from 'react-dom'
+import { BarChart3 } from 'lucide-react'
 import {
-  getDefaultProblem,
-  buildInitialTableau,
-  solveStepByStep,
-  type SimplexProblem,
-  type SimplexStep,
-} from '#/lib/simplex.ts'
-import { SimplexTable } from '#/components/simplex-table.tsx'
-import { StepExplanation } from '#/components/step-explanation.tsx'
-import { startIntroTour, startFillTour, destroyTour } from '#/components/tour.tsx'
-import { Button } from '#/components/ui/button.tsx'
+  DEFAULT_HEIGHTS,
+  parseHeights,
+  buildFrequencyTable,
+  computeMeasures,
+  type FrequencyTable,
+  type Measures,
+} from '#/utils/index.ts'
+import { HeightsInput } from '#/components/heights-input.tsx'
+import { MeasuresGrid } from '#/components/measures-grid.tsx'
+import { FrequencyTableView } from '#/components/frequency-table.tsx'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card.tsx'
-import { Tooltip, TooltipTrigger, TooltipContent } from '#/components/ui/tooltip.tsx'
-import {
-  GraduationCap,
-  Play,
-  Eraser,
-  SquarePlus,
-  X,
-  ChevronLeft,
-  ChevronRight,
-  TriangleAlert,
-} from 'lucide-react'
-import { cn } from '#/lib/utils.ts'
 
 export const Route = createFileRoute('/')({
   component: Home,
   head: () => ({
-    meta: [{ title: 'Simplex Resolver' }],
+    meta: [{ title: 'Tabela de Frequências' }],
   }),
 })
 
-function blankTourCells(matrix: number[][]): number[][] {
-  return matrix.map((row) => row.map(() => 0))
-}
-
-function normalizeProblem(p: SimplexProblem): SimplexProblem {
-  return {
-    ...p,
-    objectiveFn: `Z = ${p.varNames.map((name, j) => `${p.objective[j]}${name}`).join(' + ')}`,
-  }
-}
-
-function ObjectiveToggle({
-  maximize,
-  onChange,
-  disabled,
-}: {
-  maximize: boolean
-  onChange: (maximize: boolean) => void
-  disabled?: boolean
-}) {
-  return (
-    <div className="flex items-center rounded-md bg-muted p-0.5" role="group" aria-label="Objetivo da função">
-      <button
-        type="button"
-        onClick={() => onChange(true)}
-        aria-pressed={maximize}
-        disabled={disabled}
-        className={cn(
-          'h-7 rounded-[min(var(--radius-md),8px)] px-3 text-xs font-medium transition-colors disabled:pointer-events-none disabled:opacity-50',
-          maximize
-            ? 'bg-background text-foreground shadow-xs'
-            : 'text-muted-foreground hover:text-foreground',
-        )}
-      >
-        Max
-      </button>
-      <button
-        type="button"
-        onClick={() => onChange(false)}
-        aria-pressed={!maximize}
-        disabled={disabled}
-        className={cn(
-          'h-7 rounded-[min(var(--radius-md),8px)] px-3 text-xs font-medium transition-colors disabled:pointer-events-none disabled:opacity-50',
-          !maximize
-            ? 'bg-background text-foreground shadow-xs'
-            : 'text-muted-foreground hover:text-foreground',
-        )}
-      >
-        Min
-      </button>
-    </div>
-  )
+interface Result {
+  table: FrequencyTable
+  measures: Measures
 }
 
 function Home() {
-  const [problem, setProblem] = useState<SimplexProblem>(() =>
-    normalizeProblem(getDefaultProblem()),
-  )
-  const tableau = useMemo(() => buildInitialTableau(problem), [problem])
+  const [text, setText] = useState(() => DEFAULT_HEIGHTS.join(' '))
+  const [result, setResult] = useState<Result | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  const [values, setValues] = useState<number[][]>(() => blankTourCells(tableau.matrix))
-  const [filledCells, setFilledCells] = useState<Set<string>>(new Set())
-  const [phase, setPhase] = useState<'idle' | 'filling' | 'ready' | 'solving'>('idle')
-  const [steps, setSteps] = useState<SimplexStep[]>([])
-  const [currentStep, setCurrentStep] = useState(0)
-  const [highlight, setHighlight] = useState<{ row: number; col: number }[]>([])
-  const [introTourActive, setIntroTourActive] = useState(false)
-  const [fillTourActive, setFillTourActive] = useState(false)
-  const [showFillWarning, setShowFillWarning] = useState(false)
-
-  useEffect(() => {
-    setValues(blankTourCells(tableau.matrix))
-    setFilledCells(new Set())
-  }, [tableau])
-
-  useEffect(() => {
-    if (!showFillWarning) return
-    const timer = setTimeout(() => setShowFillWarning(false), 4000)
-    return () => clearTimeout(timer)
-  }, [showFillWarning])
-
-  const handleToggleMaximize = useCallback((maximize: boolean) => {
-    setProblem((prev) => normalizeProblem({ ...prev, maximize }))
-  }, [])
-
-  const handleAddVariable = useCallback(() => {
-    setProblem((prev) => {
-      if (prev.varNames.length >= 10) return prev
-      const nextIndex = prev.varNames.length
-      const name = nextIndex < 26 ? String.fromCharCode(65 + nextIndex) : `V${nextIndex + 1}`
-      return normalizeProblem({
-        ...prev,
-        varNames: [...prev.varNames, name],
-        objective: [...prev.objective, 0],
-        constraints: prev.constraints.map((c) => ({
-          ...c,
-          coefficients: [...c.coefficients, 0],
-        })),
-      })
-    })
-  }, [])
-
-  const handleRemoveVariable = useCallback(() => {
-    setProblem((prev) => {
-      if (prev.varNames.length <= 2) return prev
-      const last = prev.varNames.length - 1
-      return normalizeProblem({
-        ...prev,
-        varNames: prev.varNames.slice(0, last),
-        objective: prev.objective.slice(0, last),
-        constraints: prev.constraints.map((c) => ({
-          ...c,
-          coefficients: c.coefficients.slice(0, last),
-        })),
-      })
-    })
-  }, [])
-
-  const handleAddConstraint = useCallback(() => {
-    setProblem((prev) => {
-      if (prev.constraints.length >= 10) return prev
-      return normalizeProblem({
-        ...prev,
-        constraints: [
-          ...prev.constraints,
-          {
-            coefficients: new Array(prev.varNames.length).fill(0),
-            label: `R${prev.constraints.length + 1}`,
-            rhs: 0,
-          },
-        ],
-      })
-    })
-  }, [])
-
-  const handleRemoveConstraint = useCallback(() => {
-    setProblem((prev) => {
-      if (prev.constraints.length <= 1) return prev
-      return normalizeProblem({
-        ...prev,
-        constraints: prev.constraints.slice(0, -1),
-      })
-    })
-  }, [])
-
-  const handleStartTour = useCallback(() => {
-    flushSync(() => setIntroTourActive(true))
-    startIntroTour(
-      () => {
-        setIntroTourActive(false)
-        setPhase('filling')
-        setTimeout(() => {
-          setFillTourActive(true)
-          startFillTour(
-            problem,
-            (step) => {
-              const [r, c] = step.cell.split('-').map(Number)
-              setValues((prev) => {
-                const next = prev.map((row) => [...row])
-                next[r][c] = step.answer
-                return next
-              })
-              setFilledCells((prev) => new Set([...prev, step.cell]))
-            },
-            () => {
-              setFillTourActive(false)
-              setPhase('ready')
-            },
-          )
-        }, 400)
-      },
-    )
-  }, [problem])
-
-  const handleManualFill = useCallback((row: number, col: number, raw: string) => {
-    const num = raw === '' ? 0 : parseFloat(raw)
-    if (!isNaN(num)) {
-      setValues((prev) => {
-        const next = prev.map((r) => [...r])
-        next[row][col] = num
-        return next
-      })
-      setFilledCells((prev) => new Set([...prev, `${row}-${col}`]))
-    }
-  }, [])
-
-  const handleSolve = useCallback(() => {
-    if (filledCells.size === 0) {
-      setShowFillWarning(true)
+  const handleCalculate = () => {
+    const heights = parseHeights(text)
+    if (heights.length === 0) {
+      setError('Nenhum valor válido encontrado. Digite as alturas separadas por espaço.')
+      setResult(null)
       return
     }
-    const result = solveStepByStep(problem, tableau)
-    setSteps(result)
-    setCurrentStep(0)
-    setPhase('solving')
-    if (result.length > 0) {
-      setHighlight(result[0].highlight ?? [])
-    }
-  }, [problem, tableau, filledCells])
-
-  const handleNextStep = useCallback(() => {
-    if (currentStep < steps.length - 1) {
-      const next = currentStep + 1
-      setCurrentStep(next)
-      setHighlight(steps[next].highlight ?? [])
-    }
-  }, [currentStep, steps])
-
-  const handlePrevStep = useCallback(() => {
-    if (currentStep > 0) {
-      const prev = currentStep - 1
-      setCurrentStep(prev)
-      setHighlight(steps[prev].highlight ?? [])
-    }
-  }, [currentStep, steps])
-
-  const handleClear = useCallback(() => {
-    setValues(blankTourCells(tableau.matrix))
-    setFilledCells(new Set())
-    setPhase('idle')
-    setSteps([])
-    setCurrentStep(0)
-    setHighlight([])
-    destroyTour()
-  }, [tableau])
-
-  const isOptimal = steps.length > 0 && currentStep === steps.length - 1
-
-  const canEditStructure =
-    (phase === 'idle' || phase === 'filling') && !introTourActive && !fillTourActive
-
-  const canClear = !introTourActive && !fillTourActive && (phase !== 'idle' || filledCells.size > 0)
-
-  const currentTableau =
-    phase === 'solving' && steps[currentStep]
-      ? steps[currentStep].tableau
-      : tableau
+    const table = buildFrequencyTable(heights)
+    setResult({ table, measures: computeMeasures(table) })
+    setError(null)
+  }
 
   return (
     <div className="flex flex-1 flex-col items-center">
-      {showFillWarning && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-2">
-          <Card className="flex-row items-center gap-3 py-2.5 pl-4 pr-2.5 shadow-lg border-destructive/40">
-            <TriangleAlert className="size-4 text-destructive shrink-0" />
-            <p className="text-sm">Preencha a tabela antes de resolver.</p>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              aria-label="Fechar aviso"
-              onClick={() => setShowFillWarning(false)}
-            >
-              <X />
-            </Button>
-          </Card>
-        </div>
-      )}
       <div className="w-full max-w-4xl px-6 flex flex-col items-center gap-4 md:gap-8 py-6 md:py-12">
-        {/* Problema — sempre montado pra tabela não pular; mobile compacto (py-2 + conteúdo menor) em vez de sumir */}
-        <Card
-          className={cn(
-            'w-full max-w-2xl gap-0 py-2 md:py-3',
-            !(introTourActive || phase === 'filling') && 'invisible',
-          )}
-          data-simplex-problem
-        >
-          <CardHeader className="pb-1">
-            <CardTitle className="text-sm">{problem.title}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {problem.context && (
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                {problem.context}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Tabela */}
-        <div className="w-full max-w-4xl mx-auto flex flex-col gap-2">
-          <h2 className="text-lg font-bold">Tabela Simplex</h2>
-          <p className="text-sm text-muted-foreground -mt-1.5">
-            Preencha as células com os dados do problema.
+        <header className="w-full max-w-2xl text-center">
+          <h1 className="text-3xl font-bold tracking-tight">Tabela de Frequências</h1>
+          <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+            Trabalho de Estatística: informe as alturas dos alunos da sala e o sistema monta a
+            tabela de frequências completa e calcula média, moda, mediana, variância e desvio
+            padrão.
           </p>
-          <div className="mt-1 md:mt-3 flex items-stretch gap-1.5">
-            <Card className="flex-1 min-w-0 py-0 overflow-hidden">
-              <div className="overflow-x-auto">
-                <SimplexTable
-                  tableau={currentTableau}
-                  values={phase === 'solving' ? currentTableau.matrix : values}
-                  onChange={handleManualFill}
-                  editable={phase === 'idle' || phase === 'filling'}
-                  highlight={highlight}
-                  pivotCell={phase === 'solving' ? steps[currentStep]?.tableau.pivot : undefined}
-                  filledCells={filledCells}
-                  step={currentStep}
-                  enteringCol={
-                    phase === 'solving' && steps[currentStep]?.explain?.kind === 'choose-pivot'
-                      ? steps[currentStep].tableau.entering
-                      : undefined
-                  }
-                  leavingRow={
-                    phase === 'solving' && steps[currentStep]?.explain?.kind === 'choose-pivot'
-                      ? steps[currentStep].tableau.leaving
-                      : undefined
-                  }
-                  ratios={
-                    phase === 'solving' && steps[currentStep]?.explain?.kind === 'choose-pivot'
-                      ? steps[currentStep].explain?.ratios
-                      : undefined
-                  }
-                />
-              </div>
+        </header>
+
+        <HeightsInput value={text} onChange={setText} onSubmit={handleCalculate} error={error} />
+
+        {result && (
+          <>
+            <MeasuresGrid measures={result.measures} />
+
+            <Card className="w-full max-w-2xl">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <BarChart3 className="size-4 text-primary" />
+                  Tabela de frequências completa
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FrequencyTableView table={result.table} />
+              </CardContent>
             </Card>
-
-            {canEditStructure && (
-              <div className="flex flex-col justify-center gap-1 shrink-0">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label="Adicionar variável"
-                      disabled={problem.varNames.length >= 10}
-                      onClick={handleAddVariable}
-                    >
-                      <SquarePlus />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Adicionar variável</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label="Remover variável"
-                      disabled={problem.varNames.length <= 2}
-                      onClick={handleRemoveVariable}
-                    >
-                      <X />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Remover variável</TooltipContent>
-                </Tooltip>
-
-                <div className="mx-1.5 h-px bg-border" />
-
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label="Adicionar restrição"
-                      disabled={problem.constraints.length >= 10}
-                      onClick={handleAddConstraint}
-                    >
-                      <SquarePlus />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Adicionar restrição</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      aria-label="Remover restrição"
-                      disabled={problem.constraints.length <= 1}
-                      onClick={handleRemoveConstraint}
-                    >
-                      <X />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Remover restrição</TooltipContent>
-                </Tooltip>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Controles — mesma barra, mesmos botões, na mesma posição em todas as fases;
-            o que muda é apenas o estado disabled. O grupo Anterior/Próximo ocupa o
-            lugar do botão Resolver durante a resolução, em vez de disputar espaço à parte. */}
-        <div className="w-full max-w-4xl flex justify-between items-center">
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              aria-label="Iniciar tutorial"
-              disabled={phase !== 'idle' && phase !== 'filling'}
-              onClick={handleStartTour}
-            >
-              <span className="hidden sm:inline">Iniciar Tutorial</span>
-              <GraduationCap />
-            </Button>
-            <Button
-              variant={phase === 'filling' ? 'outline' : 'ghost'}
-              size="sm"
-              aria-label="Limpar tabela"
-              disabled={!canClear}
-              onClick={handleClear}
-            >
-              <span className="hidden sm:inline">Limpar</span>
-              <Eraser />
-            </Button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="flex items-center" data-simplex-objective>
-              <ObjectiveToggle
-                maximize={problem.maximize}
-                onChange={handleToggleMaximize}
-                disabled={phase === 'solving'}
-              />
-            </div>
-            {phase === 'solving' ? (
-              <div className="flex items-center rounded-md border border-border" role="group" data-slot="button-group">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="rounded-r-none"
-                      aria-label="Passo anterior"
-                      onClick={handlePrevStep}
-                      disabled={currentStep === 0}
-                    >
-                      <ChevronLeft />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Passo anterior</TooltipContent>
-                </Tooltip>
-                <div className="h-5 w-px bg-border" />
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="rounded-l-none"
-                      aria-label="Próximo passo"
-                      onClick={handleNextStep}
-                      disabled={isOptimal}
-                    >
-                      <ChevronRight />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>{isOptimal ? 'Concluído' : 'Próximo passo'}</TooltipContent>
-                </Tooltip>
-              </div>
-            ) : (
-              <Button size="sm" aria-label="Resolver" onClick={handleSolve} data-simplex-solve>
-                <span className="hidden sm:inline">Resolver</span>
-                <Play />
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Descrição do passo */}
-        {phase === 'solving' && steps[currentStep] && (
-          <Card className="w-full max-w-2xl" key={currentStep}>
-            <CardContent>
-              <StepExplanation
-                description={steps[currentStep].description}
-                explain={steps[currentStep].explain}
-              />
-            </CardContent>
-          </Card>
+          </>
         )}
       </div>
     </div>

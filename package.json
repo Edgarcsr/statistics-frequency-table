@@ -1,7 +1,12 @@
 {
-  "name": "simplex-resolver",
+  "name": "statistics-frequency-table",
   "private": true,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Edgarcsr/simplex-resolver.git",
+    "directory": "."
+  },
   "imports": {
     "#/*": "./src/*"
   },
@@ -20,7 +25,6 @@
     "@tanstack/react-start": "latest",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "driver.js": "^1.8.0",
     "lucide-react": "^0.577.0",
     "nitro": "^3.0.260610-beta",
     "radix-ui": "^1.6.7",

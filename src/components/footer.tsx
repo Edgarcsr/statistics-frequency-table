@@ -19,7 +19,7 @@ export function Footer() {
           href="https://github.com/Edgarcsr/simplex-resolver"
           target="_blank"
           rel="noreferrer noopener"
-          aria-label="GitHub - simplex-resolver"
+          aria-label="GitHub - statistics-frequency-table"
           className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
         >
           <svg
