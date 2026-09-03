@@ -1,16 +1,26 @@
 import { useState } from 'react'
-import { Calculator, Database } from 'lucide-react'
+import { Cake, Calculator, Database, Ruler, TextSearch, Weight } from 'lucide-react'
 import { Button } from '#/components/ui/button.tsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card.tsx'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '#/components/ui/dropdown-menu.tsx'
+import type { ExampleDataset } from '#/utils/index.ts'
 
 interface ValuesInputProps {
   value: string
   onChange: (value: string) => void
   onSubmit: () => void
   error: string | null
+  examples: ExampleDataset[]
 }
 
-export function ValuesInput({ value, onChange, onSubmit, error }: ValuesInputProps) {
+export function ValuesInput({ value, onChange, onSubmit, error, examples }: ValuesInputProps) {
   const [submitted, setSubmitted] = useState(false)
 
   const handleSubmit = () => {
@@ -45,13 +55,46 @@ export function ValuesInput({ value, onChange, onSubmit, error }: ValuesInputPro
             {error}
           </p>
         )}
-        <Button size="sm" className="mt-3 w-full sm:w-auto" onClick={handleSubmit}>
-          <Calculator />
-          Calcular
-        </Button>
+        <div className="mt-3 flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" aria-label="Carregar exemplo">
+                <TextSearch />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="top" align="start">
+              <DropdownMenuLabel>Exemplos</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {examples.map((example) => (
+                <DropdownMenuItem
+                  key={example.id}
+                  onClick={() => onChange(example.values.join(' '))}
+                >
+                  <ExampleIcon id={example.id} />
+                  {example.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Button size="sm" className="flex-1" onClick={handleSubmit}>
+            <Calculator />
+            Calcular
+          </Button>
+        </div>
       </CardContent>
     </Card>
   )
+}
+
+const EXAMPLE_ICONS: Record<string, typeof Ruler> = {
+  alturas: Ruler,
+  idades: Cake,
+  pesos: Weight,
+}
+
+function ExampleIcon({ id }: { id: string }) {
+  const Icon = EXAMPLE_ICONS[id] ?? Ruler
+  return <Icon className="size-4 text-primary" />
 }
 
 function cnTextarea(invalid: boolean) {

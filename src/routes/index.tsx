@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { BarChart3 } from 'lucide-react'
 import {
-  DEFAULT_VALUES,
+  EXAMPLE_DATASETS,
   parseValues,
   buildFrequencyTable,
   computeMeasures,
@@ -27,7 +27,7 @@ interface Result {
 }
 
 function Home() {
-  const [text, setText] = useState(() => DEFAULT_VALUES.join(' '))
+  const [text, setText] = useState('')
   const [result, setResult] = useState<Result | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -54,7 +54,7 @@ function Home() {
           </p>
         </header>
 
-        <ValuesInput value={text} onChange={setText} onSubmit={handleCalculate} error={error} />
+        <ValuesInput value={text} onChange={setText} onSubmit={handleCalculate} error={error} examples={EXAMPLE_DATASETS} />
 
         {result && (
           <>
