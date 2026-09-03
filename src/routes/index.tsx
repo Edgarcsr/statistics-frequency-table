@@ -58,9 +58,7 @@ function Home() {
 
         {result && (
           <>
-            <MeasuresGrid measures={result.measures} />
-
-            <Card className="w-full max-w-2xl">
+            <Card className="w-full max-w-2xl animate-fade-in">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <BarChart3 className="size-4 text-primary" />
@@ -71,6 +69,8 @@ function Home() {
                 <FrequencyTableView table={result.table} />
               </CardContent>
             </Card>
+
+            <MeasuresGrid measures={result.measures} />
           </>
         )}
       </div>
