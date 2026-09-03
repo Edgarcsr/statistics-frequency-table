@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseHeights } from '../data'
+import { parseValues } from '../data'
 import { buildFrequencyTable } from '../frequency'
 import { meanGrouped, meanRaw } from '../mean'
 import { medianGrouped } from '../median'
@@ -10,13 +10,13 @@ import { computeMeasures } from '../measures'
 
 const SAMPLE = [1, 2, 2, 3, 4]
 
-describe('parseHeights', () => {
+describe('parseValues', () => {
   it('parses values separated by spaces, commas and semicolons', () => {
-    expect(parseHeights('1,5 2;3,5, 4')).toEqual([1.5, 2, 3.5, 4])
+    expect(parseValues('1,5 2;3,5, 4')).toEqual([1.5, 2, 3.5, 4])
   })
 
   it('ignores invalid tokens', () => {
-    expect(parseHeights('abc 1 -3 0 2.5')).toEqual([1, 2.5])
+    expect(parseValues('abc 1 -3 0 2.5')).toEqual([1, 2.5])
   })
 })
 

@@ -2,14 +2,14 @@ import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { BarChart3 } from 'lucide-react'
 import {
-  DEFAULT_HEIGHTS,
-  parseHeights,
+  DEFAULT_VALUES,
+  parseValues,
   buildFrequencyTable,
   computeMeasures,
   type FrequencyTable,
   type Measures,
 } from '#/utils/index.ts'
-import { HeightsInput } from '#/components/heights-input.tsx'
+import { ValuesInput } from '#/components/values-input.tsx'
 import { MeasuresGrid } from '#/components/measures-grid.tsx'
 import { FrequencyTableView } from '#/components/frequency-table.tsx'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card.tsx'
@@ -27,18 +27,18 @@ interface Result {
 }
 
 function Home() {
-  const [text, setText] = useState(() => DEFAULT_HEIGHTS.join(' '))
+  const [text, setText] = useState(() => DEFAULT_VALUES.join(' '))
   const [result, setResult] = useState<Result | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const handleCalculate = () => {
-    const heights = parseHeights(text)
-    if (heights.length === 0) {
-      setError('Nenhum valor válido encontrado. Digite as alturas separadas por espaço.')
+    const values = parseValues(text)
+    if (values.length === 0) {
+      setError('Nenhum valor válido encontrado. Digite os valores separados por espaço.')
       setResult(null)
       return
     }
-    const table = buildFrequencyTable(heights)
+    const table = buildFrequencyTable(values)
     setResult({ table, measures: computeMeasures(table) })
     setError(null)
   }
@@ -49,13 +49,12 @@ function Home() {
         <header className="w-full max-w-2xl text-center">
           <h1 className="text-3xl font-bold tracking-tight">Tabela de Frequências</h1>
           <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-            Trabalho de Estatística: informe as alturas dos alunos da sala e o sistema monta a
-            tabela de frequências completa e calcula média, moda, mediana, variância e desvio
-            padrão.
+            Informe qualquer conjunto de dados e o sistema monta a tabela de frequências
+            completa e calcula média, moda, mediana, variância e desvio padrão.
           </p>
         </header>
 
-        <HeightsInput value={text} onChange={setText} onSubmit={handleCalculate} error={error} />
+        <ValuesInput value={text} onChange={setText} onSubmit={handleCalculate} error={error} />
 
         {result && (
           <>

@@ -1,8 +1,8 @@
 import type { FrequencyTable } from './types'
 
-export function meanRaw(heights: number[]): number {
-  if (heights.length === 0) return 0
-  return heights.reduce((sum, value) => sum + value, 0) / heights.length
+export function meanRaw(values: number[]): number {
+  if (values.length === 0) return 0
+  return values.reduce((sum, value) => sum + value, 0) / values.length
 }
 
 export function meanGrouped(table: FrequencyTable): number {

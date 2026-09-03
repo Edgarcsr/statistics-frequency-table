@@ -4,14 +4,14 @@ export function standardDeviation(variance: number): number {
   return Math.sqrt(variance)
 }
 
-export function variancePopulationRaw(heights: number[]): number {
-  if (heights.length === 0) return 0
-  const mean = meanRaw(heights)
-  return heights.reduce((sum, value) => sum + (value - mean) ** 2, 0) / heights.length
+export function variancePopulationRaw(values: number[]): number {
+  if (values.length === 0) return 0
+  const mean = meanRaw(values)
+  return values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / values.length
 }
 
-export function varianceSampleRaw(heights: number[]): number {
-  if (heights.length <= 1) return 0
-  const mean = meanRaw(heights)
-  return heights.reduce((sum, value) => sum + (value - mean) ** 2, 0) / (heights.length - 1)
+export function varianceSampleRaw(values: number[]): number {
+  if (values.length <= 1) return 0
+  const mean = meanRaw(values)
+  return values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / (values.length - 1)
 }

@@ -38,7 +38,7 @@ function Metodo() {
 
         <h1 className="mt-6 text-3xl font-bold tracking-tight">Método</h1>
         <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-          Resumo das fórmulas usadas para agrupar as alturas em classes e calcular as medidas de
+          Resumo das fórmulas usadas para agrupar os dados em classes e calcular as medidas de
           tendência central e de dispersão.
         </p>
 
@@ -98,7 +98,7 @@ h = (máx − mín) / k`}</CodeBlock>
           <CodeBlock>{`σ² = Σ( fi · (xi − x̄)² ) / n        (populacional)
 s² = Σ( fi · (xi − x̄)² ) / (n − 1)  (amostral)`}</CodeBlock>
           <p className="mt-3 text-sm leading-relaxed text-foreground/90">
-            O desvio padrão é a raiz quadrada da variância, na mesma unidade dos dados (cm):
+            O desvio padrão é a raiz quadrada da variância, na mesma unidade dos dados:
           </p>
           <CodeBlock>{`σ = √σ²    s = √s²`}</CodeBlock>
         </section>

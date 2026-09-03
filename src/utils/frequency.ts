@@ -15,18 +15,18 @@ export function classWidth(min: number, max: number, k: number): number {
   return roundTo((max - min) / k, 2)
 }
 
-function countInClass(heights: number[], lower: number, upper: number, isLast: boolean): number {
-  return heights.reduce((count, value) => {
+function countInClass(values: number[], lower: number, upper: number, isLast: boolean): number {
+  return values.reduce((count, value) => {
     if (value < lower) return count
     if (isLast) return value <= upper ? count + 1 : count
     return value < upper ? count + 1 : count
   }, 0)
 }
 
-export function buildFrequencyTable(heights: number[]): FrequencyTable {
-  const n = heights.length
-  const min = Math.min(...heights)
-  const max = Math.max(...heights)
+export function buildFrequencyTable(values: number[]): FrequencyTable {
+  const n = values.length
+  const min = Math.min(...values)
+  const max = Math.max(...values)
   const k = sturgesK(n)
   const h = classWidth(min, max, k)
 
@@ -39,7 +39,7 @@ export function buildFrequencyTable(heights: number[]): FrequencyTable {
     const lower = i === 0 ? min : roundTo(min + i * h, 2)
     const upper = i === k - 1 ? max : roundTo(min + (i + 1) * h, 2)
     const isLast = i === k - 1
-    const fi = countInClass(heights, lower, upper, isLast)
+    const fi = countInClass(values, lower, upper, isLast)
     const fr = n > 0 ? fi / n : 0
     const frPct = fr * 100
     Fi += fi

@@ -68,8 +68,8 @@ export function FrequencyTableView({ table }: FrequencyTableProps) {
         </TableBody>
       </Table>
       <p className="mt-3 text-xs text-muted-foreground">
-        {table.n} alunos · {table.k} classes (regra de Sturges: k = 1 + 3,322 · log₁₀ n) ·
-        amplitude da classe h = {table.h.toFixed(2)} cm
+        {table.n} valores · {table.k} classes (regra de Sturges: k = 1 + 3,322 · log₁₀ n) ·
+        amplitude da classe h = {table.h.toFixed(2)}
       </p>
     </div>
   )

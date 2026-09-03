@@ -1,16 +1,16 @@
 import { useState } from 'react'
-import { Calculator, Ruler } from 'lucide-react'
+import { Calculator, Database } from 'lucide-react'
 import { Button } from '#/components/ui/button.tsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card.tsx'
 
-interface HeightsInputProps {
+interface ValuesInputProps {
   value: string
   onChange: (value: string) => void
   onSubmit: () => void
   error: string | null
 }
 
-export function HeightsInput({ value, onChange, onSubmit, error }: HeightsInputProps) {
+export function ValuesInput({ value, onChange, onSubmit, error }: ValuesInputProps) {
   const [submitted, setSubmitted] = useState(false)
 
   const handleSubmit = () => {
@@ -22,12 +22,11 @@ export function HeightsInput({ value, onChange, onSubmit, error }: HeightsInputP
     <Card className="w-full max-w-2xl">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <Ruler className="size-4 text-primary" />
-          Alturas dos alunos (cm)
+          <Database className="size-4 text-primary" />
+          Dados
         </CardTitle>
         <CardDescription>
-          Digite as alturas em centímetros, separadas por <strong>espaço</strong>. Depois clique
-          em "Calcular".
+          Digite os valores, separados por <strong>espaço</strong>. Depois clique em "Calcular".
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -35,7 +34,7 @@ export function HeightsInput({ value, onChange, onSubmit, error }: HeightsInputP
           value={value}
           onChange={(e) => onChange(e.target.value)}
           spellCheck={false}
-          aria-label="Alturas dos alunos em centímetros, separadas por espaço"
+          aria-label="Valores separados por espaço"
           aria-invalid={submitted && error !== null}
           rows={4}
           placeholder="ex.: 152 155 158 160 163 165"
