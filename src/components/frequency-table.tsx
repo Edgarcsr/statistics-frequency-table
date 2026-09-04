@@ -22,21 +22,26 @@ export function FrequencyTableView({ table }: FrequencyTableProps) {
     )
   }
 
-  const lastRow = table.rows[table.rows.length - 1]
+  const sumSquaredDeviation = table.rows.reduce(
+    (sum, row) => sum + row.squaredDeviationTimesFrequency,
+    0,
+  )
 
   return (
     <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Classe</TableHead>
+            <TableHead>i</TableHead>
+            <TableHead>x1</TableHead>
             <TableHead className="text-center">fi</TableHead>
-            <TableHead className="text-center">fr</TableHead>
-            <TableHead className="text-center">fr (%)</TableHead>
-            <TableHead className="text-center">Fi</TableHead>
-            <TableHead className="text-center">Fi (%)</TableHead>
-            <TableHead className="text-center">xi</TableHead>
-            <TableHead className="text-center">xi · fi</TableHead>
+            <TableHead className="text-center">fa</TableHead>
+            <TableHead className="text-center">fr(%)</TableHead>
+            <TableHead className="text-center">fra(%)</TableHead>
+            <TableHead className="text-center">xm</TableHead>
+            <TableHead className="text-center">xm · fi</TableHead>
+            <TableHead className="text-center">x̄</TableHead>
+            <TableHead className="text-center">(xm−x̄)² · f</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -52,35 +57,53 @@ export function FrequencyTableView({ table }: FrequencyTableProps) {
                 ease: 'easeOut',
               }}
             >
-              <TableCell className="font-medium">{row.className}</TableCell>
-              <TableCell className="text-center tabular-nums">{row.fi}</TableCell>
-              <TableCell className="text-center tabular-nums">{row.fr.toFixed(2)}</TableCell>
-              <TableCell className="text-center tabular-nums">{row.frPct.toFixed(1)}%</TableCell>
-              <TableCell className="text-center tabular-nums">{row.Fi}</TableCell>
-              <TableCell className="text-center tabular-nums">{row.FiPct.toFixed(1)}%</TableCell>
-              <TableCell className="text-center tabular-nums">{row.xi.toFixed(1)}</TableCell>
-              <TableCell className="text-center tabular-nums">{row.xiFi.toFixed(1)}</TableCell>
+              <TableCell className="font-medium">{row.index}</TableCell>
+              <TableCell>{row.classLabel}</TableCell>
+              <TableCell className="text-center tabular-nums">{row.frequency}</TableCell>
+              <TableCell className="text-center tabular-nums">
+                {row.cumulativeFrequency}
+              </TableCell>
+              <TableCell className="text-center tabular-nums">
+                {row.relativePct.toFixed(1)}%
+              </TableCell>
+              <TableCell className="text-center tabular-nums">
+                {row.cumulativeRelativePct.toFixed(1)}%
+              </TableCell>
+              <TableCell className="text-center tabular-nums">
+                {row.midpoint.toFixed(1)}
+              </TableCell>
+              <TableCell className="text-center tabular-nums">
+                {row.midpointTimesFrequency.toFixed(1)}
+              </TableCell>
+              <TableCell className="text-center tabular-nums">
+                {table.mean.toFixed(2)}
+              </TableCell>
+              <TableCell className="text-center tabular-nums">
+                {row.squaredDeviationTimesFrequency.toFixed(2)}
+              </TableCell>
             </motion.tr>
           ))}
           <TableRow className="border-t-2 border-border font-semibold">
             <TableCell>Total</TableCell>
-            <TableCell className="text-center tabular-nums">{lastRow.Fi}</TableCell>
-            <TableCell className="text-center tabular-nums">1.00</TableCell>
-            <TableCell className="text-center tabular-nums">
-              {table.sumFiPct.toFixed(1)}%
-            </TableCell>
-            <TableCell className="text-center tabular-nums">—</TableCell>
+            <TableCell>—</TableCell>
+            <TableCell className="text-center tabular-nums">{table.sumFi}</TableCell>
+            <TableCell className="text-center tabular-nums">{table.n}</TableCell>
+            <TableCell className="text-center tabular-nums">100%</TableCell>
             <TableCell className="text-center tabular-nums">100%</TableCell>
             <TableCell className="text-center tabular-nums">—</TableCell>
             <TableCell className="text-center tabular-nums">
               {table.sumXiFi.toFixed(1)}
             </TableCell>
+            <TableCell className="text-center tabular-nums">—</TableCell>
+            <TableCell className="text-center tabular-nums">
+              {sumSquaredDeviation.toFixed(2)}
+            </TableCell>
           </TableRow>
         </TableBody>
       </Table>
       <p className="mt-3 text-xs text-muted-foreground">
-        {table.n} valores · {table.k} classes (regra de Sturges: k = 1 + 3,322 · log₁₀ n) ·
-        amplitude da classe h = {table.h.toFixed(2)}
+        {table.n} valores · {table.k} classes (k = ⌈√n⌉) · amplitude da classe h ={' '}
+        {table.h.toFixed(2)}
       </p>
     </div>
   )

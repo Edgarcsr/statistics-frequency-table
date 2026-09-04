@@ -20,8 +20,8 @@ interface FrequencyChartProps {
 
 export function FrequencyChart({ table }: FrequencyChartProps) {
   const data = table.rows.map((row) => ({
-    className: row.className,
-    fi: row.fi,
+    classLabel: row.classLabel,
+    fi: row.frequency,
   }))
 
   return (
@@ -37,7 +37,7 @@ export function FrequencyChart({ table }: FrequencyChartProps) {
         <BarChart accessibilityLayer data={data} margin={{ top: 24 }}>
           <CartesianGrid vertical={false} />
           <XAxis
-            dataKey="className"
+            dataKey="classLabel"
             tickLine={false}
             tickMargin={10}
             axisLine={false}

@@ -21,7 +21,7 @@ Projeto de Estatística que, a partir das alturas dos alunos de uma sala (dados 
 ## Como funciona
 
 1. Digite as alturas em cm (separadas por espaço, vírgula ou quebra de linha) — já vem com dados de exemplo.
-2. O sistema agrupa em classes pela regra de Sturges: `k = 1 + 3,322 · log₁₀ n`.
+2. O sistema agrupa em classes pela regra da raiz quadrada: `k = ⌈√n⌉`.
 3. Monta a tabela de frequências completa e recalcula as medidas ao vivo.
 4. A página "Documentação" explica cada fórmula usada.
 
@@ -48,19 +48,16 @@ src/
 │   ├── index.tsx            # home: input + medidas + tabela
 │   └── metodo.tsx           # fórmulas
 ├── components/
-│   ├── ui/                  # shadcn (table, card, button)
-│   ├── heights-input.tsx    # editor de alturas
+│   ├── ui/                  # shadcn (table, card, button, chart)
+│   ├── values-input.tsx    # editor de alturas
 │   ├── measures-grid.tsx    # cards de resultados
-│   └── frequency-table.tsx  # tabela de frequências
-└── utils/                   # lógica de cálculo (um arquivo por medida)
-    ├── frequency.ts         # agrupamento em classes (Sturges)
-    ├── mean.ts              # média
-    ├── median.ts            # mediana
-    ├── mode.ts              # moda (Czuber)
-    ├── variance.ts          # variância
-    ├── standard-deviation.ts# desvio padrão
+│   ├── frequency-table.tsx  # tabela de frequências
+│   └── frequency-chart.tsx  # histograma
+└── utils/                   # lógica de cálculo
+    ├── math.ts              # contas (classes, média, mediana, moda, variância)
     ├── data.ts              # dados de exemplo + parser
-    └── types.ts             # tipos compartilhados
+    ├── types.ts             # tipos compartilhados
+    └── cn.ts                # utilitário de classes
 ```
 
 ## Testes

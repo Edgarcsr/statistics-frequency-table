@@ -53,17 +53,18 @@ function Metodo() {
         <motion.section className="mt-10" {...revealProps}>
           <h2 className="text-xl font-semibold tracking-tight">Agrupamento em classes</h2>
           <p className="mt-3 text-sm leading-relaxed text-foreground/90">
-            Com os dados brutos, calculamos o número de classes pela{' '}
-            <strong>regra de Sturges</strong>:
+            O número de classes pode ser calculado pela <strong>regra da raiz quadrada</strong>{' '}
+            (a usada neste trabalho) ou pela <strong>regra de Sturges</strong>:
           </p>
-          <CodeBlock>{`k = 1 + 3,322 · log₁₀ n
+          <CodeBlock>{`k = ⌈√n⌉            (regra da raiz quadrada — usada)
+k = 1 + 3,322 · log₁₀ n   (regra de Sturges)
 
 h = (máx − mín) / k`}</CodeBlock>
           <p className="mt-3 text-sm leading-relaxed text-foreground/90">
             Cada classe recebe frequência absoluta <Code>fi</Code>, frequência relativa{' '}
-            <Code>fr = fi / n</Code>, frequência acumulada <Code>Fi</Code>, ponto médio{' '}
-            <Code>xi = (limite inferior + limite superior) / 2</Code> e o produto{' '}
-            <Code>xi · fi</Code>.
+            <Code>fr = fi / n</Code>, frequência acumulada <Code>fa</Code>, ponto médio{' '}
+            <Code>xm = (limite inferior + limite superior) / 2</Code> e o produto{' '}
+            <Code>xm · fi</Code>.
           </p>
         </motion.section>
 

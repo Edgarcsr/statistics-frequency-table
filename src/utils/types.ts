@@ -2,14 +2,14 @@ export interface FrequencyRow {
   index: number
   lower: number
   upper: number
-  className: string
-  fi: number
-  fr: number
-  frPct: number
-  Fi: number
-  FiPct: number
-  xi: number
-  xiFi: number
+  classLabel: string
+  frequency: number
+  relativePct: number
+  cumulativeFrequency: number
+  cumulativeRelativePct: number
+  midpoint: number
+  midpointTimesFrequency: number
+  squaredDeviationTimesFrequency: number
 }
 
 export interface FrequencyTable {
@@ -19,6 +19,7 @@ export interface FrequencyTable {
   h: number
   min: number
   max: number
+  mean: number
   sumFi: number
   sumFiPct: number
   sumXiFi: number
