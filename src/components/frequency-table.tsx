@@ -1,3 +1,4 @@
+import { motion } from 'motion/react'
 import {
   Table,
   TableBody,
@@ -39,8 +40,17 @@ export function FrequencyTableView({ table }: FrequencyTableProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {table.rows.map((row) => (
-            <TableRow key={row.index}>
+          {table.rows.map((row, index) => (
+            <motion.tr
+              key={row.index}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{
+                delay: 0.1 + index * 0.035,
+                duration: 0.22,
+                ease: 'easeOut',
+              }}
+            >
               <TableCell className="font-medium">{row.className}</TableCell>
               <TableCell className="text-center tabular-nums">{row.fi}</TableCell>
               <TableCell className="text-center tabular-nums">{row.fr.toFixed(2)}</TableCell>
@@ -49,7 +59,7 @@ export function FrequencyTableView({ table }: FrequencyTableProps) {
               <TableCell className="text-center tabular-nums">{row.FiPct.toFixed(1)}%</TableCell>
               <TableCell className="text-center tabular-nums">{row.xi.toFixed(1)}</TableCell>
               <TableCell className="text-center tabular-nums">{row.xiFi.toFixed(1)}</TableCell>
-            </TableRow>
+            </motion.tr>
           ))}
           <TableRow className="border-t-2 border-border font-semibold">
             <TableCell>Total</TableCell>

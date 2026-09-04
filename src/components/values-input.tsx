@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 import { Cake, Calculator, Database, Ruler, TextSearch, Weight } from 'lucide-react'
 import { Button } from '#/components/ui/button.tsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card.tsx'
@@ -50,11 +51,21 @@ export function ValuesInput({ value, onChange, onSubmit, error, examples }: Valu
           placeholder="ex.: 152 155 158 160 163 165"
           className={cnTextarea(submitted && error !== null)}
         />
-        {submitted && error && (
-          <p className="mt-2 text-xs text-destructive" role="alert">
-            {error}
-          </p>
-        )}
+        <AnimatePresence>
+          {submitted && error && (
+            <motion.p
+              key={error}
+              role="alert"
+              className="mt-2 text-xs text-destructive"
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {error}
+            </motion.p>
+          )}
+        </AnimatePresence>
         <div className="mt-3 flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -101,7 +112,7 @@ function cnTextarea(invalid: boolean) {
   return [
     'mt-1 w-full resize-y rounded-md border bg-background px-3 py-2',
     'font-mono text-sm leading-relaxed outline-none transition-colors',
-    'focus-visible:ring-2 focus-visible:ring-ring',
+    'focus-visible:ring-2 focus-visible:ring-primary/40',
     invalid ? 'border-destructive' : 'border-input',
   ].join(' ')
 }

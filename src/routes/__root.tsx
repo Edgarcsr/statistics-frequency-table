@@ -1,3 +1,4 @@
+import { MotionConfig } from 'motion/react'
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
@@ -42,11 +43,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <div className="flex min-h-dvh flex-col">
-          <Header />
-          <div className="flex flex-1 flex-col">{children}</div>
-          <Footer />
-        </div>
+        <MotionConfig reducedMotion="user">
+          <div className="flex min-h-dvh flex-col">
+            <Header />
+            <div className="flex flex-1 flex-col">{children}</div>
+            <Footer />
+          </div>
+        </MotionConfig>
         <TanStackDevtools
           config={{
             position: 'bottom-right',
