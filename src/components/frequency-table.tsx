@@ -43,6 +43,7 @@ export function FrequencyTableView({ table }: FrequencyTableProps) {
           {table.rows.map((row, index) => (
             <motion.tr
               key={row.index}
+              className="transition-colors hover:bg-muted/50"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{

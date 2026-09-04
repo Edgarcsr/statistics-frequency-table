@@ -50,6 +50,10 @@ export function MeasuresGrid({ measures }: MeasuresGridProps) {
       value: measures.mode,
       hint: measures.mode === null ? 'sem moda (Czuber)' : 'fórmula de Czuber',
       tooltip: String.raw`Mo = L + \frac{d_1}{d_1 + d_2} \cdot h`,
+      extra:
+        measures.modeMidpoint === null
+          ? undefined
+          : `Ponto médio da classe modal: ${measures.modeMidpoint.toFixed(2)}`,
     },
     {
       icon: Percent,
@@ -88,7 +92,7 @@ export function MeasuresGrid({ measures }: MeasuresGridProps) {
       initial="hidden"
       animate="show"
     >
-      {items.map(({ icon: Icon, label, value, hint, tooltip }) => (
+      {items.map(({ icon: Icon, label, value, hint, tooltip, extra }) => (
         <motion.div
           key={label}
           variants={itemVariants}
@@ -115,6 +119,9 @@ export function MeasuresGrid({ measures }: MeasuresGridProps) {
                   </TooltipContent>
                 </Tooltip>
               </p>
+              {extra && (
+                <p className="mt-0.5 text-xs text-muted-foreground">{extra}</p>
+              )}
             </CardContent>
           </Card>
         </motion.div>

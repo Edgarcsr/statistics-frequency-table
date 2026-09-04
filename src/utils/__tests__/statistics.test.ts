@@ -1,12 +1,19 @@
 import { describe, it, expect } from 'vitest'
 import { parseValues } from '../data'
-import { buildFrequencyTable } from '../frequency'
-import { meanGrouped, meanRaw } from '../mean'
-import { medianGrouped } from '../median'
-import { modeGrouped } from '../mode'
-import { variancePopulationGrouped, varianceSampleGrouped } from '../variance'
-import { standardDeviation, variancePopulationRaw, varianceSampleRaw } from '../standard-deviation'
-import { computeMeasures } from '../measures'
+import {
+  buildFrequencyTable,
+  meanGrouped,
+  meanRaw,
+  medianGrouped,
+  modeGrouped,
+  modeMidpoint,
+  variancePopulationGrouped,
+  varianceSampleGrouped,
+  standardDeviation,
+  variancePopulationRaw,
+  varianceSampleRaw,
+  computeMeasures,
+} from '../math'
 
 const SAMPLE = [1, 2, 2, 3, 4]
 
@@ -62,6 +69,11 @@ describe('mode', () => {
   it('computes mode by Czuber formula', () => {
     const table = buildFrequencyTable(SAMPLE)
     expect(modeGrouped(table)).toBeCloseTo(2.125, 10)
+  })
+
+  it('computes mode by midpoint of the modal class', () => {
+    const table = buildFrequencyTable(SAMPLE)
+    expect(modeMidpoint(table)).toBeCloseTo(2.125, 10)
   })
 
   it('returns null when all classes have equal frequency', () => {

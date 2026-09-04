@@ -28,6 +28,7 @@ export interface Measures {
   mean: number
   median: number
   mode: number | null
+  modeMidpoint: number | null
   variancePopulation: number
   varianceSample: number
   stdDeviationPopulation: number

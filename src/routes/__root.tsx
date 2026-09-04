@@ -25,7 +25,7 @@ export const Route = createRootRoute({
       {
         rel: 'icon',
         type: 'image/svg+xml',
-        href: '/favicon.svg',
+        href: `${import.meta.env.VITE_BASE_PATH ?? ''}/favicon.svg`,
       },
       {
         rel: 'stylesheet',

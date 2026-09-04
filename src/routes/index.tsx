@@ -13,6 +13,7 @@ import {
 import { ValuesInput } from '#/components/values-input.tsx'
 import { MeasuresGrid } from '#/components/measures-grid.tsx'
 import { FrequencyTableView } from '#/components/frequency-table.tsx'
+import { FrequencyChart } from '#/components/frequency-chart.tsx'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card.tsx'
 
 export const Route = createFileRoute('/')({
@@ -100,6 +101,9 @@ function Home() {
                 </CardHeader>
                 <CardContent>
                   <FrequencyTableView table={result.table} />
+                  <div className="mt-6">
+                    <FrequencyChart table={result.table} />
+                  </div>
                 </CardContent>
               </Card>
 
