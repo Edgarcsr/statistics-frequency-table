@@ -44,19 +44,13 @@ export function Header() {
       </Link>
       <nav className="flex items-center gap-1">
         <Button variant="ghost" size="sm" asChild>
-          <Link
-            to="/"
-            className="relative after:absolute after:inset-x-2 after:bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-primary after:transition-transform after:duration-200 after:ease-out hover:after:scale-x-100"
-          >
+          <Link to="/" className="flex items-center gap-1.5">
             <BoxIcon />
             Início
           </Link>
         </Button>
         <Button variant="ghost" size="sm" asChild>
-          <Link
-            to="/metodo"
-            className="relative after:absolute after:inset-x-2 after:bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-primary after:transition-transform after:duration-200 after:ease-out hover:after:scale-x-100"
-          >
+          <Link to="/metodo" className="flex items-center gap-1.5">
             <BookOpen />
             Documentação
           </Link>
