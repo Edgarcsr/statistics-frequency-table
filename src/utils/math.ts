@@ -52,7 +52,10 @@ export function buildFrequencyTable(values: number[]): FrequencyTable {
 
   for (let i = 0; i < k; i++) {
     const lower = i === 0 ? min : roundTo(min + i * h, 2)
-    const upper = i === k - 1 ? max : roundTo(min + (i + 1) * h, 2)
+    const upper =
+      i === k - 1
+        ? Math.max(max, roundTo(min + (i + 1) * h, 2))
+        : roundTo(min + (i + 1) * h, 2)
     const isLast = i === k - 1
     const frequency = frequencyInClass(values, lower, upper, isLast)
     const relativePct = n > 0 ? (frequency / n) * 100 : 0
