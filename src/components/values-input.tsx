@@ -48,7 +48,7 @@ export function ValuesInput({ value, onChange, onSubmit, error, examples }: Valu
           aria-label="Valores separados por espaço"
           aria-invalid={submitted && error !== null}
           rows={4}
-          placeholder="ex.: 152 155 158 160 163 165"
+          placeholder="ex.: 1,70 1,69 1,82 1,80 1,79 1,74"
           className={cnTextarea(submitted && error !== null)}
         />
         <AnimatePresence>

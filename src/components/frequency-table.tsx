@@ -64,22 +64,22 @@ export function FrequencyTableView({ table }: FrequencyTableProps) {
                 {row.cumulativeFrequency}
               </TableCell>
               <TableCell className="text-center tabular-nums">
-                {row.relativePct.toFixed(1)}%
+                {row.relativePct.toFixed(2)}%
               </TableCell>
               <TableCell className="text-center tabular-nums">
-                {row.cumulativeRelativePct.toFixed(1)}%
+                {row.cumulativeRelativePct.toFixed(2)}%
               </TableCell>
               <TableCell className="text-center tabular-nums">
-                {row.midpoint.toFixed(1)}
+                {row.midpoint.toFixed(2)}
               </TableCell>
               <TableCell className="text-center tabular-nums">
-                {row.midpointTimesFrequency.toFixed(1)}
+                {row.midpointTimesFrequency.toFixed(2)}
               </TableCell>
               <TableCell className="text-center tabular-nums">
                 {table.mean.toFixed(2)}
               </TableCell>
               <TableCell className="text-center tabular-nums">
-                {row.squaredDeviationTimesFrequency.toFixed(2)}
+                {row.squaredDeviationTimesFrequency.toFixed(4)}
               </TableCell>
             </motion.tr>
           ))}
@@ -92,11 +92,11 @@ export function FrequencyTableView({ table }: FrequencyTableProps) {
             <TableCell className="text-center tabular-nums">100%</TableCell>
             <TableCell className="text-center tabular-nums">—</TableCell>
             <TableCell className="text-center tabular-nums">
-              {table.sumXiFi.toFixed(1)}
+              {table.sumXiFi.toFixed(2)}
             </TableCell>
             <TableCell className="text-center tabular-nums">—</TableCell>
             <TableCell className="text-center tabular-nums">
-              {sumSquaredDeviation.toFixed(2)}
+              {sumSquaredDeviation.toFixed(4)}
             </TableCell>
           </TableRow>
         </TableBody>

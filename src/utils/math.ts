@@ -16,7 +16,7 @@ export function sturgesK(n: number): number {
 }
 
 export function totalAmplitude(min: number, max: number): number {
-  return max - min
+  return roundTo(max - min, 2)
 }
 
 // This is the distance between each class from one another
