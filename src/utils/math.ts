@@ -81,7 +81,7 @@ export function buildFrequencyTable(values: number[]): FrequencyTable {
     })
   }
 
-  const mean = n > 0 ? sumXiFi / n : 0
+  const mean = n > 0 ? roundTo(sumXiFi / n, 2) : 0
 
   for (const row of rows) {
     row.squaredDeviationTimesFrequency = row.frequency * (row.midpoint - mean) ** 2
@@ -103,7 +103,7 @@ export function buildFrequencyTable(values: number[]): FrequencyTable {
 
 export function meanGrouped(table: FrequencyTable): number {
   if (table.n === 0) return 0
-  return table.sumXiFi / table.n
+  return roundTo(table.sumXiFi / table.n, 2)
 }
 
 export function medianGrouped(table: FrequencyTable): number {
