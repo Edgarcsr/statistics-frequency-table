@@ -1,12 +1,12 @@
 <p align="center">
-  <img alt="Statistics Frequency Table" src="https://shieldcn.dev/header/glow.svg?title=Tabela+de+Frequ%C3%AAncias&subtitle=Trabalho+de+Estat%C3%ADstica%3A+tabela+de+frequ%C3%AAncias+completa+e+medidas+de+tend%C3%AAncia+central+e+dispers%C3%A3o.&logo=lu%3ABarChart3&mode=dark&theme=teal&align=left" />
+<img alt="Tabela de Frequências" src="https://shieldcn.dev/header/graph.svg?title=Tabela+de+Frequ%C3%AAncias&subtitle=+Trabalho+de+Estat%C3%ADstica+com+tabela+de+frequ%C3%AAncias+e+medidas+de+tend%C3%AAncia+central+e+dispers%C3%A3o.&mode=dark">
 </p>
 
 <p align="center">
   <img alt="built in" src="https://shieldcn.dev/flag/br.svg" />
-  <img alt="fork" src="https://img.shields.io/badge/fork%20de-simplex--resolver-0d9488?style=flat" />
+  <a href="https://github.com/Edgarcsr/statistics-frequency-table"><img alt="repo views" src="https://shieldcn.dev/views/repo/Edgarcsr/statistics-frequency-table.svg?variant=outline" /></a>
+  <a href="https://edgarcsr.github.io/statistics-frequency-table/"><img alt="badge" src="https://shieldcn.dev/badge/Access Website.svg?logo=github" /></a>
 </p>
-
 ## Fork
 
 Este projeto é um **fork** do [simplex-resolver](https://github.com/Edgarcsr/simplex-resolver), de
@@ -58,10 +58,4 @@ src/
     ├── data.ts              # dados de exemplo + parser
     ├── types.ts             # tipos compartilhados
     └── cn.ts                # utilitário de classes
-```
-
-## Testes
-
-```bash
-npx vitest run
 ```
