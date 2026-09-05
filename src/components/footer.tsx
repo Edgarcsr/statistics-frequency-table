@@ -16,7 +16,7 @@ export function Footer() {
           ·
         </span>
         <a
-          href="https://github.com/Edgarcsr/simplex-resolver"
+          href="https://github.com/Edgarcsr/statistics-frequency-table"
           target="_blank"
           rel="noreferrer noopener"
           aria-label="GitHub - statistics-frequency-table"
