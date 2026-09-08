@@ -15,14 +15,14 @@ export const EXAMPLE_DATASETS: ExampleDataset[] = [
     ],
   },
   {
-    id: 'idades',
-    label: 'Idades dos alunos (anos)',
-    values: [17, 18, 18, 19, 19, 19, 20, 20, 21, 21, 22, 22, 23, 24, 25],
+    id: 'temperaturas',
+    label: 'Temperaturas máximas (ºC)',
+    values: [20, 21, 22, 23, 24, 25, 25, 26, 27, 28, 29, 29, 30, 31, 32],
   },
   {
-    id: 'pesos',
-    label: 'Pesos dos alunos (kg)',
-    values: [52, 55, 57, 58, 60, 61, 62, 63, 65, 66, 68, 70, 72, 75, 78, 80, 82, 85],
+    id: 'precos',
+    label: 'Preços de produtos (R$)',
+    values: [19, 24, 27, 31, 35, 38, 42, 45, 49, 52, 55, 58, 61, 64, 68, 71, 75, 79],
   },
 ]
 

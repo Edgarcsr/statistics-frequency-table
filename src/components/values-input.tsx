@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { Cake, Calculator, Database, Ruler, TextSearch, Weight } from 'lucide-react'
+import { Calculator, Database, Ruler, ShoppingBag, TextSearch, Thermometer } from 'lucide-react'
 import { Button } from '#/components/ui/button.tsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '#/components/ui/card.tsx'
 import {
@@ -99,8 +99,8 @@ export function ValuesInput({ value, onChange, onSubmit, error, examples }: Valu
 
 const EXAMPLE_ICONS: Record<string, typeof Ruler> = {
   alturas: Ruler,
-  idades: Cake,
-  pesos: Weight,
+  temperaturas: Thermometer,
+  precos: ShoppingBag,
 }
 
 function ExampleIcon({ id }: { id: string }) {
