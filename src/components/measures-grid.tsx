@@ -59,6 +59,7 @@ export function MeasuresGrid({ measures }: MeasuresGridProps) {
       icon: Percent,
       label: 'Variância populacional',
       value: measures.variancePopulation,
+      format: (n: number) => n.toFixed(4),
       hint: 'σ²',
       tooltip: String.raw`\sigma^2 = \frac{\sum (f_i \cdot (x_i - \bar{x})^2)}{n}`,
     },
@@ -66,6 +67,7 @@ export function MeasuresGrid({ measures }: MeasuresGridProps) {
       icon: Percent,
       label: 'Variância amostral',
       value: measures.varianceSample,
+      format: (n: number) => n.toFixed(4),
       hint: 's²',
       tooltip: String.raw`s^2 = \frac{\sum (f_i \cdot (x_i - \bar{x})^2)}{n - 1}`,
     },
@@ -73,6 +75,7 @@ export function MeasuresGrid({ measures }: MeasuresGridProps) {
       icon: Percent,
       label: 'Desvio padrão populacional',
       value: measures.stdDeviationPopulation,
+      format: (n: number) => n.toFixed(4),
       hint: 'σ',
       tooltip: String.raw`\sigma = \sqrt{\sigma^2}`,
     },
@@ -80,6 +83,7 @@ export function MeasuresGrid({ measures }: MeasuresGridProps) {
       icon: Percent,
       label: 'Desvio padrão amostral',
       value: measures.stdDeviationSample,
+      format: (n: number) => n.toFixed(4),
       hint: 's',
       tooltip: String.raw`s = \sqrt{s^2}`,
     },
@@ -92,7 +96,7 @@ export function MeasuresGrid({ measures }: MeasuresGridProps) {
       initial="hidden"
       animate="show"
     >
-      {items.map(({ icon: Icon, label, value, hint, tooltip, extra }) => (
+      {items.map(({ icon: Icon, label, value, format, hint, tooltip, extra }) => (
         <motion.div
           key={label}
           variants={itemVariants}
@@ -107,7 +111,7 @@ export function MeasuresGrid({ measures }: MeasuresGridProps) {
             </CardHeader>
             <CardContent className="gap-0">
               <p className="text-2xl font-bold tracking-tight">
-                {value === null ? '—' : <AnimatedNumber value={value} />}
+                {value === null ? '—' : <AnimatedNumber value={value} format={format} />}
               </p>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 <Tooltip>
